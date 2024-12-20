@@ -1,9 +1,11 @@
-from flask import Flask
-from api.routes.olx_route import olx_bp
-from api.routes.badr_route import badr_bp
-from api.routes.sigma_route import sigma_bp
+from flask import Flask, Blueprint
+
 
 app = Flask(__name__)
+
+badr_bp = Blueprint('badr', __name__)
+olx_bp = Blueprint('olx', __name__)
+sigma_bp = Blueprint('sigma', __name__)
 
 # Register blueprints
 app.register_blueprint(olx_bp, url_prefix='/olx')

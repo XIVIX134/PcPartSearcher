@@ -1,10 +1,12 @@
 import requests
 from bs4 import BeautifulSoup
 import json
+from urllib.parse import quote
 
-# Base URL for the site (correct URL structure)
+# Base URL for the site
 BASE_URL = "https://elbadrgroupeg.store"
-PRODUCT_LIST_URL = "https://elbadrgroupeg.store/cpu"
+SEARCH_URL = "https://elbadrgroupeg.store/index.php?route=product/search&search="
+DEFAULT_URL = "https://elbadrgroupeg.store/index.php?route=product/search&search=e"
 
 def get_product_details(product_url):
     """Scrapes individual product details."""
@@ -42,9 +44,15 @@ def get_product_details(product_url):
         }
     return {}
 
-def scrape_first_page():
-    """Scrapes only the first page of products."""
-    url = PRODUCT_LIST_URL
+def scrape_first_page(search_term=None):
+    """Scrapes only the first page of products with optional search term."""
+    if search_term:
+        # Encode the search term for URL
+        encoded_term = quote(search_term)
+        url = SEARCH_URL + encoded_term
+    else:
+        url = DEFAULT_URL
+
     response = requests.get(url)
     if response.status_code == 200:
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -66,16 +74,21 @@ def scrape_first_page():
     return []
 
 def main():
-    print("Scraping the first page of products...")
-    products = scrape_first_page()
+    # Example searches
+    search_terms = ["RTX 4090"]  # You can modify these or add more
     
-    if products:
-        # Save to a JSON file
-        with open('badr.json', 'w', encoding='utf-8') as f:
-            json.dump(products, f, ensure_ascii=False, indent=4)
-        print(f"Scraped {len(products)} products and saved to 'products_first_page.json'")
-    else:
-        print("No products found on the first page.")
+    for term in search_terms:
+        print(f"Scraping products for search term: {term}")
+        products = scrape_first_page(term)
+        
+        if products:
+            # Save to a JSON file with search term in filename
+            filename = f'badr_{term.replace(" ", "_")}.json'
+            with open(filename, 'w', encoding='utf-8') as f:
+                json.dump(products, f, ensure_ascii=False, indent=4)
+            print(f"Scraped {len(products)} products and saved to '{filename}'")
+        else:
+            print(f"No products found for search term: {term}")
 
 if __name__ == '__main__':
     main()

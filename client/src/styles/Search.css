@@ -1,0 +1,90 @@
+:root {
+  --background-color: #1a1a1a;
+  --text-color: #ffffff;
+  --primary-color: #007bff;
+  --card-background: #2d2d2d;
+}
+
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  margin: 0;
+  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto;
+}
+
+.search-page {
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.search-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  text-align: center;
+}
+
+.search-input {
+  width: 80%;
+  max-width: 600px;
+  padding: 15px;
+  font-size: 18px;
+  border: none;
+  border-radius: 8px;
+  background: var(--card-background);
+  color: var(--text-color);
+  margin-bottom: 20px;
+}
+
+.search-button {
+  padding: 15px 30px;
+  font-size: 18px;
+  background: var(--primary-color);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.search-button:hover {
+  opacity: 0.9;
+}
+
+.results-container {
+  max-width: 1200px;
+  margin: 40px auto;
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.product-card {
+  background: var(--card-background);
+  border-radius: 8px;
+  padding: 15px;
+  transition: transform 0.2s;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+}
+
+.product-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.loader {
+  text-align: center;
+  padding: 20px;
+  font-size: 18px;
+}

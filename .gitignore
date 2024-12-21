@@ -16,3 +16,9 @@ server/api/__pycache__/__init__.cpython-312.pyc
 /server/api/controllers/__pycache__
 /server/api/routes/__pycache__
 server/api/routes/__pycache__/__init__.cpython-312.pyc
+server/data_g502.json
+server/data_hp.json
+server/data_rtx 4060 ti.json
+server/data_rtx 4060.json
+server/data_rtx.json
+server/data_rtx 4060ti.json

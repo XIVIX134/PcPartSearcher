@@ -1,25 +1,67 @@
-import React, { useState } from 'react';
+import React, { useState, FormEvent } from 'react';
 import { api } from '../services/api';
 import { ProductCard } from '../components/ProductCard';
 import '../styles/Search.css';
 
+type SortDirection = 'asc' | 'desc' | null;
+
+interface Product {
+  'Product ID': string;
+  'Title': string;
+  'Price': string;
+  'Location': string;
+  'Image URL': string;
+  'Details Link': string;
+}
+
+interface SearchResults {
+  olx: Product[];
+  badr: any[];
+}
+
 export const SearchPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [results, setResults] = useState<{olx: any[], badr: any[]}>({ olx: [], badr: [] });
+  const [results, setResults] = useState<SearchResults>({ olx: [], badr: [] });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
 
-  const handleSearch = async (e: React.FormEvent) => {
+  const handleSearch = async (e: FormEvent) => {
     e.preventDefault();
     if (!searchTerm.trim()) return;
 
     setLoading(true);
+    setError(null);
     try {
       const response = await api.search(searchTerm);
-      setResults(response.data);
-    } catch (error) {
-      console.error('Search failed:', error);
+      // Make sure response data matches the expected structure
+      if (response.data && Array.isArray(response.data.olx)) {
+        setResults({
+          olx: response.data.olx,
+          badr: response.data.badr || []
+        });
+      } else {
+        setResults({ olx: [], badr: [] });
+        setError('No results found');
+      }
+    } catch (err) {
+      console.error('Search failed:', err);
+      setResults({ olx: [], badr: [] });
+      setError('Search failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
+  };
+
+  const sortResults = (direction: SortDirection) => {
+    if (!results.olx.length) return;
+    setSortDirection(direction);
+    const sorted = [...results.olx].sort((a, b) => {
+      const priceA = parseFloat(a.Price.replace(/[^0-9.]/g, ''));
+      const priceB = parseFloat(b.Price.replace(/[^0-9.]/g, ''));
+      return direction === 'asc' ? priceA - priceB : priceB - priceA;
+    });
+    setResults({ ...results, olx: sorted });
   };
 
   return (
@@ -42,23 +84,40 @@ export const SearchPage: React.FC = () => {
 
       {loading && <div className="loader">Searching...</div>}
 
-      {!loading && (results.olx.length > 0) && (
+      {!loading && results.olx.length > 0 && (
         <div className="results-container">
-          <h2>Search Results</h2>
+          <div className="results-header">
+            <h2>Search Results ({results.olx.length} items)</h2>
+            <div className="sort-controls">
+              <select
+                className="sort-select"
+                aria-label="Sort results by price"
+                onChange={(e) => sortResults(e.target.value as SortDirection)}
+                value={sortDirection || ''}
+              >
+                <option value="">Sort by price</option>
+                <option value="asc">Price: Low to High</option>
+                <option value="desc">Price: High to Low</option>
+              </select>
+            </div>
+          </div>
+
           <div className="results-grid">
-            {[...results.olx].map((item, index) => (
+            {results.olx.map((item, index) => (
               <ProductCard
-                key={`${item['Product ID']}-${index}`}
-                title={item.Title}
-                price={item.Price}
-                location={item.Location}
-                imageUrl={item['Image URL']}
-                detailsLink={item['Details Link']}
+                key={`${item['Product ID'] || 'item'}-${index}`}
+                title={item.Title || 'No Title'}
+                price={item.Price || 'No Price'}
+                location={item.Location || 'No Location'}
+                imageUrl={item['Image URL'] || ''}
+                detailsLink={item['Details Link'] || '#'}
               />
             ))}
           </div>
         </div>
       )}
+
+      {error && <div className="error-message">{error}</div>}
     </div>
   );
 };

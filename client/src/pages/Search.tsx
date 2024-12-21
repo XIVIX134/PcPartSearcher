@@ -95,7 +95,7 @@ export const SearchPage: React.FC = () => {
                 onChange={(e) => sortResults(e.target.value as SortDirection)}
                 value={sortDirection || ''}
               >
-                <option value="">Sort by price</option>
+                <option value="" disabled selected hidden>Sort by price</option>
                 <option value="asc">Price: Low to High</option>
                 <option value="desc">Price: High to Low</option>
               </select>

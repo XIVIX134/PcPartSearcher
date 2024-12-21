@@ -16,14 +16,18 @@ export const ProductCard: React.FC<ProductProps> = ({
   detailsLink
 }) => {
   return (
-    <div className="product-card">
-      <img src={imageUrl} alt={title} />
-      <h3>{title}</h3>
-      <p>Price: {price}</p>
-      {location && <p>Location: {location}</p>}
-      <a href={detailsLink} target="_blank" rel="noopener noreferrer">
-        View Details
-      </a>
-    </div>
+    <a 
+      href={detailsLink} 
+      target="_blank" 
+      rel="noopener noreferrer" 
+      className="product-card-link"
+    >
+      <div className="product-card">
+        <img src={imageUrl} alt={title} />
+        <h3>{title}</h3>
+        {location && <p className="location">Location: {location}</p>}
+        <p className="price">{price}</p>
+      </div>
+    </a>
   );
 };

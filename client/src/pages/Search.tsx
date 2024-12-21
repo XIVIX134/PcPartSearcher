@@ -25,6 +25,7 @@ export const SearchPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
+  const [hasResults, setHasResults] = useState(false);
 
   const handleSearch = async (e: FormEvent) => {
     e.preventDefault();
@@ -40,14 +41,17 @@ export const SearchPage: React.FC = () => {
           olx: response.data.olx,
           badr: response.data.badr || []
         });
+        setHasResults(response.data.olx.length > 0);
       } else {
         setResults({ olx: [], badr: [] });
         setError('No results found');
+        setHasResults(false);
       }
     } catch (err) {
       console.error('Search failed:', err);
       setResults({ olx: [], badr: [] });
       setError('Search failed. Please try again.');
+      setHasResults(false);
     } finally {
       setLoading(false);
     }
@@ -66,26 +70,28 @@ export const SearchPage: React.FC = () => {
 
   return (
     <div className="search-page">
-      <div className="search-container">
+      <div className={`search-container ${hasResults ? 'has-results' : ''}`}>
         <h1>PC Part Searcher</h1>
         <form onSubmit={handleSearch}>
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search for PC parts..."
-            className="search-input"
-          />
-          <button type="submit" className="search-button" disabled={loading}>
-            {loading ? 'Searching...' : 'Search'}
-          </button>
+          <div className={`input-container ${hasResults ? 'expanded' : ''}`}>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search for PC parts..."
+              className="search-input"
+            />
+            <button type="submit" className="search-button" disabled={loading}>
+              {loading ? 'Searching...' : 'Search'}
+            </button>
+          </div>
         </form>
       </div>
 
       {loading && <div className="loader">Searching...</div>}
 
       {!loading && results.olx.length > 0 && (
-        <div className="results-container">
+        <div className={`results-container ${results.olx.length > 0 ? 'visible' : ''}`}>
           <div className="results-header">
             <h2>Search Results ({results.olx.length} items)</h2>
             <div className="sort-controls">

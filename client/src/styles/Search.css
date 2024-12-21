@@ -15,6 +15,8 @@ body {
 .search-page {
   min-height: 100vh;
   padding: 20px;
+  position: relative;
+  overflow-x: hidden; /* Prevent horizontal scrolling during animations */
 }
 
 .search-container {
@@ -24,11 +26,33 @@ body {
   justify-content: center;
   min-height: 50vh;
   text-align: center;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 2;
+  background: var(--background-color);
+}
+
+.search-container.has-results {
+  min-height: auto;
+  padding: 20px 0;
+  transform: translateY(0);
+}
+
+.search-form {
+  display: flex;
+  width: 80%;
+  max-width: 600px;
+  gap: 10px;
+  transition: all 0.5s ease;
+  align-items: center;
+}
+
+.search-form.expanded {
+  max-width: 1200px;
 }
 
 .search-input {
-  width: 80%;
-  max-width: 600px;
+  max-width: 1200px;  /* Increased from 1000px */
   padding: 15px;
   font-size: 18px;
   border: none;
@@ -36,6 +60,31 @@ body {
   background: var(--card-background);
   color: var(--text-color);
   margin-bottom: 20px;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+}
+
+.input-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 95%;  /* Wider initial width */
+  max-width: 1200px;  /* Increased from 1000px */
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.input-container.expanded {
+  flex-direction: row;
+  max-width: 1600px;  /* Increased from 1400px */
+  width: 98%;  /* Increased from 95% */
+  gap: 10px;
+  margin: 0 auto;
+}
+
+.input-container.expanded .search-input {
+  margin-bottom: 0;
+  flex: 1;
 }
 
 .search-button {
@@ -46,7 +95,8 @@ body {
   border-radius: 8px;
   color: white;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s, all 0.5s ease;
+  flex-shrink: 0;
 }
 
 .search-button:hover {
@@ -54,8 +104,19 @@ body {
 }
 
 .results-container {
-  max-width: 1200px;
-  margin: 40px auto;
+  max-width: 1400px;
+  margin: 0 auto;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+  transform: translateY(20px);
+  position: relative;
+  z-index: 1;
+}
+
+.results-container.visible {
+  opacity: 1;
+  transform: translateY(0);
+  margin-top: 40px;
 }
 
 .results-grid {

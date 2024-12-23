@@ -58,8 +58,8 @@ def scrape_olx(search_term=None):
                 match = re.search(r'-ID(\d+)', link_tag['href'])
                 product_id = match.group(1) if match else "N/A"
             else:
-                details_link = "null"
-                product_id = "null"
+                details_link = "N/A"
+                product_id = "N/A"
             
             # Add the extracted data to the list
             data_list.append({
@@ -71,14 +71,8 @@ def scrape_olx(search_term=None):
                 "Details Link": details_link,
             })
         
-            print(f"Found {len(data_list)} listings")
-            return data_list
-        else:
-            print(f"Failed to fetch the page. Status code: {response.status_code}")
-            return []
-
-if __name__ == '__main__':
-    # Example searches without spaces
-    scrape_olx("Laptop")
-    # Example searches with spaces
-    scrape_olx("RTX 3080")
+        print(f"Found {len(data_list)} listings")
+        return data_list
+    
+    print(f"Failed to fetch the page. Status code: {response.status_code}")
+    return []

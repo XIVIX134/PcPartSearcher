@@ -12,8 +12,6 @@ interface Product {
 }
 
 export const api = {
-  getLaptops: () => axios.get<Product[]>(`${API_URL}/olx/laptops`),
-  getCPUs: () => axios.get<Product[]>(`${API_URL}/badr/cpus`),
   getSigmaItems: () => axios.get<{sigma_items: string[]}>(`${API_URL}/sigma/items`),
   search: (searchTerm: string) => 
     axios.post<{olx: Product[], badr: Product[]}>(`${API_URL}/search`, { searchTerm }),

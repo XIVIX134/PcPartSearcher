@@ -33,7 +33,7 @@ body {
 }
 
 .search-container.has-results {
-  min-height: auto;
+  min-height: 0;  /* Changed from 'auto' to '0' for better compatibility */
   padding: 20px 0;
   transform: translateY(0);
 }
@@ -172,10 +172,12 @@ body {
   margin: 0 0 10px 0;
   font-size: 1rem;
   line-height: 1.4;
-  /* Limit title to 2 lines */
+  /* Multiple browser support for line clamping */
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;  /* Added standard property */
   -webkit-box-orient: vertical;
+  box-orient: vertical;  /* Added standard property */
   overflow: hidden;
 }
 

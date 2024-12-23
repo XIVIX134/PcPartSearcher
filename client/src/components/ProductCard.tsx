@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 
 interface ProductProps {
   title: string;
@@ -14,7 +14,7 @@ export const ProductCard: React.FC<ProductProps> = ({
   location,
   imageUrl,
   detailsLink
-}) => {
+}: ProductProps) => {
   return (
     <a 
       href={detailsLink} 

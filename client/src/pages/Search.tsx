@@ -1,4 +1,5 @@
-import React, { useState, FormEvent } from 'react';
+import * as React from 'react';
+import { useState, FormEvent } from 'react';
 import { api } from '../services/api';
 import { ProductCard } from '../components/ProductCard';
 import '../styles/Search.css';
@@ -15,7 +16,7 @@ interface Product {
 }
 
 interface SearchResults {
-  olx: Product[];
+  olx: Product[]; 
   badr: any[];
 }
 

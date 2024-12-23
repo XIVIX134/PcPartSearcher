@@ -71,16 +71,11 @@ def scrape_olx(search_term=None):
                 "Details Link": details_link,
             })
         
-        # Save the data to a JSON file
-        filename = f"data_{search_term}.json" if search_term else "data.json"
-        with open(filename, "w", encoding="utf-8") as json_file:
-            json.dump(data_list, json_file, indent=4, ensure_ascii=False)
-        
-        print(f"Data successfully saved to {filename}")
-        return data_list
-    else:
-        print(f"Failed to fetch the page. Status code: {response.status_code}")
-        return []
+            print(f"Found {len(data_list)} listings")
+            return data_list
+        else:
+            print(f"Failed to fetch the page. Status code: {response.status_code}")
+            return []
 
 if __name__ == '__main__':
     # Example searches without spaces

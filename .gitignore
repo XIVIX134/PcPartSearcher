@@ -1,24 +1,23 @@
+# ignore all pycache folders
+__pycache__/
+server/api/routes/__pycache__/
+server/api/controllers/__pycache__/
+server/api/__pycache__/
+scarpers/__pycache__/
+
+# ignore specific files
 /scarpers/badr.json
 /scarpers/data.json
 data_laptop.json
 data_RTX 3080.json
 data.json
 badr_RTX_4090.json
-/server/api/routes/__pycache__
-/server/api/controllers/__pycache__
-/server/api/__pycache__
-/client/node_modules
-/scarpers/__pycache__
-__pycache__
-server/api/__pycache__/__init__.cpython-312.pyc
-/server/api/__pycache__
-/server/api/__pycache__
-/server/api/controllers/__pycache__
-/server/api/routes/__pycache__
-server/api/routes/__pycache__/__init__.cpython-312.pyc
 server/data_g502.json
 server/data_hp.json
 server/data_rtx 4060 ti.json
 server/data_rtx 4060.json
 server/data_rtx.json
 server/data_rtx 4060ti.json
+
+# ignore node_modules
+/client/node_modules

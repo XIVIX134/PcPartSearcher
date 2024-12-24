@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState, FormEvent } from 'react';
-import { api } from '../services/api';
+import { apiService } from '../services/api';
 import { ProductCard } from '../components/ProductCard';
 import '../styles/Search.css';
 
@@ -35,7 +35,7 @@ export const SearchPage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.search(searchTerm);
+      const response = await apiService.search(searchTerm);
       // Make sure response data matches the expected structure
       if (response.data && Array.isArray(response.data.olx)) {
         setResults({

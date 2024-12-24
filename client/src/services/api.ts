@@ -1,6 +1,14 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000';
+// Create axios instance with proxy configuration
+const api = axios.create({
+  baseURL: '/api',  // Use relative path - will be handled by Vite proxy
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  timeout: 30000, // 30 second timeout
+  withCredentials: false  // Changed to false to work with wildcard CORS
+});
 
 interface Product {
   'Product ID': string;
@@ -11,8 +19,43 @@ interface Product {
   'Details Link': string;
 }
 
-export const api = {
-  getSigmaItems: () => axios.get<{sigma_items: string[]}>(`${API_URL}/sigma/items`),
+// Add response interceptor for error handling
+api.interceptors.response.use(
+  response => response,
+  async (err) => {
+    const { config, message } = err;
+    if (!config || !config.retry) {
+      return Promise.reject(err);
+    }
+    
+    // Set the retry count
+    config.retryCount = config.retryCount ?? 0;
+    
+    if (config.retryCount >= 3) {
+      return Promise.reject(err);
+    }
+    
+    // Increase the retry count
+    config.retryCount += 1;
+    
+    // Create new promise to handle retry
+    const backoff = new Promise(resolve => {
+      setTimeout(() => resolve(null), 1000 * config.retryCount);
+    });
+    
+    // Wait for backoff time, then retry
+    await backoff;
+    return api(config);
+  }
+);
+
+export const apiService = {
+  getSigmaItems: () => 
+    api.get<{sigma_items: string[]}>('sigma/items'),
+    
   search: (searchTerm: string) => 
-    axios.post<{olx: Product[], badr: Product[]}>(`${API_URL}/search`, { searchTerm }),
+    api.post('search', { searchTerm }, { 
+      retry: true,
+      timeout: 30000
+    }),  // Use relative path
 };

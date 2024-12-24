@@ -13,3 +13,4 @@ scarpers/__pycache__/
 
 # ignore node_modules
 /client/node_modules
+PcPartSearcher.code-workspace

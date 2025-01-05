@@ -1,0 +1,123 @@
+:root {
+  --primary-color: #007bff;
+  --secondary-color: #475569;
+  --background-color: #1a1a1a;
+  --text-color: #ffffff;
+  --error-color: #ef4444;
+  --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  --card-background: #2d2d2d;
+  --glow-color1: #ff0000;
+  --glow-color2: #00ff00;
+  --glow-color3: #0000ff;
+  --glow-spread: 15px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+h1 {
+  color: var(--primary-color);
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.2s;
+  position: relative;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  animation: rgbGlow 3s infinite linear;
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+button:not(:disabled):after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 50%);
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.5s;
+}
+
+button:not(:disabled):hover:after {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+input {
+  font-size: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--secondary-color);
+  border-radius: 8px;
+  width: 100%;
+  transition: all 0.2s;
+  background: var(--card-background);
+  color: var(--text-color);
+}
+
+input:hover {
+  box-shadow: 0 0 15px rgba(0, 123, 255, 0.2);
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 25px rgba(0, 123, 255, 0.3);
+}
+
+@keyframes rgbGlow {
+  0% {
+    box-shadow: 0 0 var(--glow-spread) var(--glow-color1);
+  }
+  33% {
+    box-shadow: 0 0 var(--glow-spread) var(--glow-color2);
+  }
+  66% {
+    box-shadow: 0 0 var(--glow-spread) var(--glow-color3);
+  }
+  100% {
+    box-shadow: 0 0 var(--glow-spread) var(--glow-color1);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-color: #0f172a;
+    --text-color: #f8fafc;
+    --secondary-color: #94a3b8;
+  }
+
+  input {
+    background-color: #1e293b;
+    color: var(--text-color);
+  }
+}

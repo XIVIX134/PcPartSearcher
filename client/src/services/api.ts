@@ -1,5 +1,12 @@
 import axios from 'axios';
 
+declare module 'axios' {
+  interface AxiosRequestConfig {
+    retry?: boolean;
+    retryCount?: number;
+  }
+}
+
 // Create axios instance with proxy configuration
 const api = axios.create({
   baseURL: '/api',  // Use relative path - will be handled by Vite proxy
@@ -10,20 +17,11 @@ const api = axios.create({
   withCredentials: false  // Changed to false to work with wildcard CORS
 });
 
-interface Product {
-  'Product ID': string;
-  'Title': string;
-  'Price': string;
-  'Location': string;
-  'Image URL': string;
-  'Details Link': string;
-}
-
 // Add response interceptor for error handling
 api.interceptors.response.use(
   response => response,
   async (err) => {
-    const { config, message } = err;
+    const { config } = err;
     if (!config || !config.retry) {
       return Promise.reject(err);
     }

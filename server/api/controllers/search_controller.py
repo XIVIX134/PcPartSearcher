@@ -13,30 +13,28 @@ sys.path.insert(0, project_root)
 
 def search_products():
     try:
-        if request.method == 'OPTIONS':
-            # Handle preflight request
-            response = jsonify({'status': 'ok'})
-            return response
-
         data = request.get_json()
-        search_term = data.get('searchTerm') if data else None
-        
-        logger.debug(f"Received search request for term: {search_term}")
+        search_term = data.get('searchTerm')
         
         if not search_term:
             return jsonify({'error': 'No search term provided'}), 400
 
         try:
             from scrapers.olx_spyder import scrape_olx
-            olx_results = scrape_olx(search_term)
-            logger.debug(f"OLX results: {len(olx_results)} items")
+            # Get all results at once
+            all_results = scrape_olx(search_term)
+            
+            logger.debug(f"Total OLX results: {len(all_results)} items")
+            
             return jsonify({
-                'olx': olx_results,
-                'badr': []  # Add empty badr results for now
+                'olx': all_results,
+                'badr': [],
+                'totalPages': len(all_results) // 24 + (1 if len(all_results) % 24 > 0 else 0),
+                'itemsPerPage': 24
             })
         except Exception as e:
             logger.error(f"OLX scraper error: {str(e)}")
-            return jsonify({'olx': [], 'badr': []})
+            return jsonify({'olx': [], 'badr': [], 'totalPages': 0, 'itemsPerPage': 24})
             
     except Exception as e:
         logger.error(f"Search error: {str(e)}")

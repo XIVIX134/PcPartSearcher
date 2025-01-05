@@ -8,6 +8,7 @@ setup(
         'flask',
         'flask-cors',
         'requests',
-        'beautifulsoup4'
+        'beautifulsoup4',
+        'aiohttp'
     ]
 )

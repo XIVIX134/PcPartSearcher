@@ -1,0 +1,75 @@
+.spinner-container {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.spinner {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.spinner-small {
+  width: 24px;
+  height: 24px;
+}
+
+.spinner-medium {
+  width: 40px;
+  height: 40px;
+}
+
+.spinner-large {
+  width: 56px;
+  height: 56px;
+}
+
+.spinner-blade {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  width: 12%;
+  height: 24%;
+  background-color: var(--primary-color);
+  border-radius: 8px;
+  animation: spinner-blade 1s linear infinite;
+  transform-origin: center 150%;
+}
+
+@keyframes spinner-blade {
+  0% { opacity: 0.85; }
+  50% { opacity: 0.25; }
+  100% { opacity: 0.25; }
+}
+
+.spinner-blade:nth-child(1)  { transform: rotate(0deg)    translateY(-150%); animation-delay: -1.0625s; }
+.spinner-blade:nth-child(2)  { transform: rotate(30deg)   translateY(-150%); animation-delay: -0.9375s; }
+.spinner-blade:nth-child(3)  { transform: rotate(60deg)   translateY(-150%); animation-delay: -0.8125s; }
+.spinner-blade:nth-child(4)  { transform: rotate(90deg)   translateY(-150%); animation-delay: -0.6875s; }
+.spinner-blade:nth-child(5)  { transform: rotate(120deg)  translateY(-150%); animation-delay: -0.5625s; }
+.spinner-blade:nth-child(6)  { transform: rotate(150deg)  translateY(-150%); animation-delay: -0.4375s; }
+.spinner-blade:nth-child(7)  { transform: rotate(180deg)  translateY(-150%); animation-delay: -0.3125s; }
+.spinner-blade:nth-child(8)  { transform: rotate(210deg)  translateY(-150%); animation-delay: -0.1875s; }
+.spinner-blade:nth-child(9)  { transform: rotate(240deg)  translateY(-150%); animation-delay: -0.0625s; }
+.spinner-blade:nth-child(10) { transform: rotate(270deg)  translateY(-150%); animation-delay: 0.0625s; }
+.spinner-blade:nth-child(11) { transform: rotate(300deg)  translateY(-150%); animation-delay: 0.1875s; }
+.spinner-blade:nth-child(12) { transform: rotate(330deg)  translateY(-150%); animation-delay: 0.3125s; }
+
+@media (prefers-reduced-motion) {
+  .spinner-blade {
+    animation: none;
+    opacity: 0.5;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .spinner-blade {
+    background-color: var(--text-color);
+  }
+}

@@ -44,12 +44,12 @@ export const Background = () => {
 
         <div className="circle-container">
           <svg 
-            width="150" 
-            height="150" 
+            width="100" 
+            height="100" 
             viewBox="0 0 150 150"
             className="circle"
             style={{
-              transform: `translate(${position.x - 75}px, ${position.y - 75}px)`,
+              transform: `translate(${position.x - 50}px, ${position.y - 50}px)`,
             }}
           >
             <circle cx="75" cy="75" r="75" fill="#ffffff" />

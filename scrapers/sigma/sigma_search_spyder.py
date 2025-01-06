@@ -76,9 +76,8 @@ def scrape_sigma_computer(search_term):
     
     return results
 
-# Example usage
-search_term = "i5 11"
-data = scrape_sigma_computer(search_term)
+def main(search_term):
+    data = scrape_sigma_computer(search_term)
 
     # Generate the file name
     result_file = f"{sanitize_filename(search_term)}.json"

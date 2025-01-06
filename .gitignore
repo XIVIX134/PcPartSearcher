@@ -3,7 +3,7 @@
 !package.json
 !package-lock.json
 !tsconfig.json
-
+!tsconfig.app.json
 # ignore all pycache folders
 __pycache__/
 server/api/routes/__pycache__/

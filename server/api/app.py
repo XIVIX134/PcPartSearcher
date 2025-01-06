@@ -3,6 +3,11 @@ from flask_cors import CORS
 from werkzeug.middleware.proxy_fix import ProxyFix
 import os
 import sys
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 # Add parent directory to Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
@@ -25,24 +30,15 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 # Increase Flask's timeout
 app.config['PERMANENT_SESSION_LIFETIME'] = 600  # 10 minutes
 
-# Configure CORS before registering blueprints
-CORS(app, 
-     resources={r"/*": {
-         "origins": "*",  # Allow all origins in development
-         "methods": ["GET", "POST", "OPTIONS"],
-         "allow_headers": ["Content-Type", "Authorization"],
-         "expose_headers": ["Content-Type"],
-         "supports_credentials": False,  # Must be False when using '*' origin
-         "max_age": 600  # Cache preflight requests for 10 minutes
-     }})
-
-@app.after_request
-def after_request(response):
-    # Ensure all responses have CORS headers
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-    return response
+# Update CORS configuration
+CORS(app, resources={
+    r"/api/*": {
+        "origins": ["http://localhost:5173", "http://127.0.0.1:5173"],
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type"],
+        "max_age": 3600
+    }
+})
 
 @app.errorhandler(Exception)
 def handle_error(error):
@@ -52,8 +48,26 @@ def handle_error(error):
         "message": str(error)
     }), 500
 
-# Register blueprints
-app.register_blueprint(olx_bp, url_prefix='/olx')
-app.register_blueprint(sigma_bp, url_prefix='/sigma')
-app.register_blueprint(badr_bp, url_prefix='/badr')  # Register badr blueprint
-app.register_blueprint(search_bp)  # No url_prefix for search
+# Register blueprints with debug logging
+logger.debug("Registering blueprints...")
+app.register_blueprint(search_bp, url_prefix='/api')
+app.register_blueprint(olx_bp, url_prefix='/api/olx')
+app.register_blueprint(sigma_bp, url_prefix='/api/sigma')
+app.register_blueprint(badr_bp, url_prefix='/api/badr')
+
+@app.route('/debug-routes', methods=['GET'])
+def list_routes():
+    """Debug endpoint to list all registered routes"""
+    routes = []
+    for rule in app.url_map.iter_rules():
+        routes.append({
+            'endpoint': rule.endpoint,
+            'methods': list(rule.methods),
+            'path': str(rule)
+        })
+    return jsonify(routes)
+
+logger.debug(f"Registered routes: {[rule.rule for rule in app.url_map.iter_rules()]}")
+
+if __name__ == '__main__':
+    app.run(host='127.0.0.1', port=5000, debug=True)

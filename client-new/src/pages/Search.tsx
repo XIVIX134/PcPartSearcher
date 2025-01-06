@@ -5,7 +5,8 @@ import { ProductCard } from '../components/ProductCard';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { SortControls } from '../components/SortControls';
 import { ViewToggle } from '../components/ViewToggle';
-import type { Product } from '../types';
+import { SourceFilters } from '../components/SourceFilters';
+import type { Product, SourceType } from '../types';
 import '../styles/Search.css';
 import { generateUID } from '../utils/uid';
 
@@ -16,6 +17,11 @@ export const SearchPage = () => {
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [isSearching, setIsSearching] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [sourceFilters, setSourceFilters] = useState<SourceFilters>({
+    olx: true,
+    badr: true,
+    sigma: true
+  });
 
   const pages = [1, ...Array.from({ length: 14 }, (_, i) => i + 2)]; // pages 1-15
 
@@ -39,6 +45,13 @@ export const SearchPage = () => {
     }
   };
 
+  const handleFilterChange = (source: SourceType) => {
+    setSourceFilters(prev => ({
+      ...prev,
+      [source]: !prev[source]
+    }));
+  };
+
   const sortProducts = useCallback((products: Product[]) => {
     // Reset to first page when sorting changes
     setCurrentPage(1);
@@ -56,19 +69,26 @@ export const SearchPage = () => {
 
   // Process and sort all products first
   const processedProducts = useMemo(() => {
-    return sortProducts([
-      ...(data?.olx?.map(product => ({ 
+    const filteredProducts = [
+      ...(sourceFilters.olx ? data?.olx?.map(product => ({ 
         ...product, 
         source: 'olx' as const,
         uid: generateUID() 
-      })) || []),
-      ...(data?.badr?.map(product => ({ 
+      })) || [] : []),
+      ...(sourceFilters.badr ? data?.badr?.map(product => ({ 
         ...product, 
         source: 'badr' as const,
         uid: generateUID()
-      })) || [])
-    ] as Product[]);
-  }, [data, sortProducts]); // Re-sort when data or sortProducts changes
+      })) || [] : []),
+      ...(sourceFilters.sigma ? data?.sigma?.map(product => ({ 
+        ...product, 
+        source: 'sigma' as const,
+        uid: generateUID()
+      })) || [] : [])
+    ] as Product[];
+
+    return sortProducts(filteredProducts);
+  }, [data, sortProducts, sourceFilters]); // Re-sort when data or sortProducts changes
 
   // Then paginate the sorted results
   const paginatedProducts = useMemo(() => {
@@ -118,6 +138,10 @@ export const SearchPage = () => {
             <div className="results-header">
               <h2>Found {processedProducts.length} items</h2>
               <div className="results-controls">
+                <SourceFilters 
+                  filters={sourceFilters}
+                  onFilterChange={handleFilterChange}
+                />
                 <SortControls
                   onSort={setSortOption}
                   currentSort={sortOption}

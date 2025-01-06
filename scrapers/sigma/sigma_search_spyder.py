@@ -60,7 +60,7 @@ def scrape_sigma_computer(search_term):
     return results
 
 # Example usage
-search_term = "i5 11"
+search_term = "rtx"
 data = scrape_sigma_computer(search_term)
 
 # Generate the file name

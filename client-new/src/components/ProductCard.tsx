@@ -26,7 +26,12 @@ export const ProductCard = ({ product }: ProductCardProps) => {
         <div className="product-info">
           <h3>{product.Title}</h3>
           <p className="price">{product.Price}</p>
-          <p className="location">{product.Location}</p>
+          <p className="location">
+            {product.Location}
+            <span className="source-badge">
+              {product.source.toUpperCase()}
+            </span>
+          </p>
         </div>
       </a>
     </div>

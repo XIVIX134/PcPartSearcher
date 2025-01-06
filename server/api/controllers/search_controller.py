@@ -4,6 +4,8 @@ import os
 import sys
 import logging
 import traceback
+from scrapers.olx.olx_spyder import scrape_olx
+from scrapers.sigma.sigma_search_spyder import scrape_sigma_computer  # Add this import
 
 # Configure logging with more details
 logging.basicConfig(
@@ -38,20 +40,34 @@ def search_products():
         if not search_term or not isinstance(search_term, str):
             raise ValueError("Invalid or missing searchTerm")
 
-        from scrapers.olx.olx_spyder import scrape_olx
-        logger.debug("Calling scrape_olx now...")
-        results = scrape_olx(search_term)
-        logger.debug(f"Scrape returned {len(results)} results")
+        # Get results from both sources
+        olx_results = scrape_olx(search_term)
+        sigma_results = scrape_sigma_computer(search_term)
+
+        # Transform sigma results to match product format
+        transformed_sigma = []
+        for item in sigma_results or []:
+            transformed_sigma.append({
+                'Product ID': item.get('link', '').split('/')[-1],
+                'Title': item.get('title', ''),
+                'Price': item.get('price_new', ''),
+                'Location': 'Sigma Computer',
+                'Image URL': item.get('image', ''),
+                'Details Link': item.get('link', ''),
+                'Description': item.get('description', '')
+            })
         
         response_data = {
-            'olx': results,
+            'olx': olx_results,
             'badr': [],
-            'totalPages': len(results) // 24 + (1 if len(results) % 24 > 0 else 0),
+            'sigma': transformed_sigma,
+            'totalPages': (len(olx_results) + len(transformed_sigma)) // 24 + 
+                        (1 if (len(olx_results) + len(transformed_sigma)) % 24 > 0 else 0),
             'itemsPerPage': 24,
             'status': 'success'
         }
         
-        logger.info(f"Search completed successfully. Found {len(results)} results")
+        logger.info(f"Search completed successfully. Found {len(olx_results) + len(transformed_sigma)} results")
         return jsonify(response_data)
 
     except Exception as e:

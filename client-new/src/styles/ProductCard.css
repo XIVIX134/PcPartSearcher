@@ -223,3 +223,19 @@
     height: 380px; /* Match grid view height on mobile */
   }
 }
+
+.source-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  margin-left: 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: var(--primary-color);
+  color: white;
+  opacity: 0.8;
+}
+
+.product-card:hover .source-badge {
+  opacity: 1;
+}

@@ -38,7 +38,7 @@ def search_products():
         if not search_term or not isinstance(search_term, str):
             raise ValueError("Invalid or missing searchTerm")
 
-        from scrapers.olx_spyder import scrape_olx
+        from scrapers.olx.olx_spyder import scrape_olx
         logger.debug("Calling scrape_olx now...")
         results = scrape_olx(search_term)
         logger.debug(f"Scrape returned {len(results)} results")

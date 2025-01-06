@@ -39,19 +39,36 @@ def scrape_sigma_computer(search_term):
             image = product.find("img", class_="img-1")["src"]
             price_new = product.find("span", class_="price-new").text.strip()
             price_old = product.find("span", class_="price-old").text.strip() if product.find("span", class_="price-old") else None
-            stock = product.find("span", class_="stock_N").text.strip() if product.find("span", class_="stock_N") else "Unknown"
             
             description_elements = product.find("div", class_="description").find_all("div")
             description = "\n".join([desc.text.strip() for desc in description_elements if desc.text.strip()])
             
-            # Append to results
+            # Improved stock detection
+            stock_status = "Unknown"
+            stock_element = product.find("div", class_="stock")
+            if stock_element:
+                status_text = stock_element.text.strip().lower()
+                if "متوفر" in status_text or "in stock" in status_text:
+                    stock_status = "In Stock"
+                elif "غير متوفر" in status_text or "out of stock" in status_text:
+                    stock_status = "Out of Stock"
+                else:
+                    # Try alternative stock indicator
+                    stock_span = product.find("span", class_="stock_Y") or product.find("span", class_="stock_N")
+                    if stock_span:
+                        if "stock_Y" in stock_span.get("class", []):
+                            stock_status = "In Stock"
+                        elif "stock_N" in stock_span.get("class", []):
+                            stock_status = "Out of Stock"
+            
+            # Append to results with improved stock status
             results.append({
                 "title": title,
                 "link": f"https://www.sigma-computer.com/{link}",
                 "image": f"https://www.sigma-computer.com/{image}",
                 "price_new": price_new,
                 "price_old": price_old,
-                "stock": stock,
+                "stock": stock_status,
                 "description": description
             })
         except Exception as e:
@@ -59,9 +76,9 @@ def scrape_sigma_computer(search_term):
     
     return results
 
-
-def main(search_term):
-    data = scrape_sigma_computer(search_term)
+# Example usage
+search_term = "i5 11"
+data = scrape_sigma_computer(search_term)
 
     # Generate the file name
     result_file = f"{sanitize_filename(search_term)}.json"

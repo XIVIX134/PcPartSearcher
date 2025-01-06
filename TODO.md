@@ -5,10 +5,8 @@
     - [ ] Add keywords
 # Backend
   - Loay:
-    - [ ] Add Database
-    - [ ] Improve the Spyder
     - [ ] Improve el badr's spyder
-    - [ ] Add support for Sigma (https://www.sigma-computer.com/)
+    - [x] Add support for Sigma (https://www.sigma-computer.com/)
     - [ ] Add support for amazon.eg (https://www.amazon.eg/)
     - [ ] Add support for alfrensia (https://alfrensia.com/)
     - [ ] Add support for Compumarts (https://www.compumarts.com/)

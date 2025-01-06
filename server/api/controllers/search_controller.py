@@ -54,7 +54,8 @@ def search_products():
                 'Location': 'Sigma Computer',
                 'Image URL': item.get('image', ''),
                 'Details Link': item.get('link', ''),
-                'Description': item.get('description', '')
+                'Description': item.get('description', ''),
+                'stock': item.get('stock', 'Unknown')  # Add stock info
             })
         
         response_data = {

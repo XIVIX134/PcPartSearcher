@@ -7,6 +7,7 @@ export interface Product {
   'Details Link': string;
   source: 'olx' | 'badr' | 'sigma';  // Add sigma as a source
   uid: string;  // Add uid field
+  stock?: string;  // Add optional stock status
 }
 
 export interface SearchResponse {

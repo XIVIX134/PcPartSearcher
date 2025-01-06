@@ -10,6 +10,12 @@ import type { Product, SourceType } from '../types';
 import '../styles/Search.css';
 import { generateUID } from '../utils/uid';
 
+interface SourceFilters {
+  olx: boolean;
+  badr: boolean;
+  sigma: boolean;
+}
+
 export const SearchPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [submittedTerm, setSubmittedTerm] = useState('');

@@ -19,6 +19,6 @@ export interface SearchResponse {
 
 export type SourceType = 'olx' | 'badr' | 'sigma';
 
-export interface SourceFilters {
+export type SourceFilters = {
   [key in SourceType]: boolean;
-}
+};

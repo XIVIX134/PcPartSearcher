@@ -1,8 +1,8 @@
 from flask import jsonify
 from api.storage import data
 
-def get_laptops():
-    laptops = [
+def get_olx():
+    olx = [
         {
             "Product ID": item.get('Product ID'),
             "Title": item.get('Title'),
@@ -13,4 +13,4 @@ def get_laptops():
         }
         for item in data
     ]
-    return jsonify(laptops)
+    return jsonify(olx)

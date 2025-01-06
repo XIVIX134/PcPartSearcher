@@ -1,8 +1,8 @@
 from flask import jsonify
 from api.storage import badr
 
-def cpus():
-    cpus_data = [
+def get_badr():
+    badr = [
         {
             "Product ID": item.get('Product ID'),
             "Title": item.get('Title'),
@@ -13,4 +13,4 @@ def cpus():
         }
         for item in badr
     ]
-    return jsonify(cpus_data)
+    return jsonify(badr)

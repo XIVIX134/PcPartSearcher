@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
-import json
-
+from flask import jsonify
+import json 
 class AmazonSpyder:
     def __init__(self):
         pass
@@ -16,7 +16,7 @@ class AmazonSpyder:
         Returns:
             str: JSON string containing product details.
         """
-        url = f"https://www.amazon.eg/s?k={search_term}&crid=25ZTFGDJ21GUD&sprefix=hp%2Caps%2C197&ref=nb_sb_noss_1"
+        url = f"https://www.amazon.eg/s?k={search_term}"
         headers = {
             "Accept-Language": "en-US,en;q=0.9",
             "Accept-Encoding": "gzip, deflate, br",
@@ -28,8 +28,8 @@ class AmazonSpyder:
         response = requests.get(url, headers=headers)
 
         if response.status_code != 200:
-            # return f"Failed to fetch data. HTTP Status Code: {response.status_code}"
-            return json.dumps({"error": f"Failed to fetch data. HTTP Status Code: {response.status_code}"})
+            return f"Failed to fetch data. HTTP Status Code: {response.status_code}"
+
 
         soup = BeautifulSoup(response.content, "html.parser")
         product_cards = soup.find_all("div", {"data-component-type": "s-search-result"})
@@ -66,22 +66,15 @@ class AmazonSpyder:
                     "image": image
                 })
             except AttributeError:
-                # Skip items with missing details
                 continue
 
 
         return products
-        # return products
-        # return json.dumps(products)
 
-# # Example usage
-# if __name__ == "__main__":
-#     scraper = AmazonSpyder()
-#     search_results = scraper.search_products("rtx 3080")
-
-#     parsed_results = json.loads(search_results)
-
-#     with open("amazon.json", 'w', encoding='utf-8') as f:
-#         json.dump(parsed_results, f, ensure_ascii=False, indent=4)
-
-#     # print(json.dumps(parsed_results, ensure_ascii=False, indent=4))
+# Example usage
+if __name__ == "__main__":
+    scraper = AmazonSpyder()
+    search_results = scraper.search_products("macbook")
+    with open("amazon.json", "w", encoding='utf-8') as file:
+        file.write(json.dumps(search_results, ensure_ascii=False, indent=4))
+    

@@ -166,7 +166,6 @@ input:focus {
   }
 }
 
-<<<<<<< HEAD
 @media (max-width: 768px) {
   :root {
     --m: 0.75rem;
@@ -201,8 +200,6 @@ input:focus {
   }
 }
 
-=======
->>>>>>> 31221af (git fix)
 .search-page {
   position: relative;
   z-index: 5;  /* Increased to be above blur layer */

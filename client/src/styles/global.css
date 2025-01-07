@@ -1,0 +1,211 @@
+@import url('https://fonts.googleapis.com/css?family=Space%20Grotesk:700|Space%20Grotesk:400');
+@import url('https://fonts.googleapis.com/css?family=IBM%20Plex%20Sans:600|IBM%20Plex%20Sans:400');
+
+:root {
+  --primary-color: #007bff;
+  --secondary-color: #475569;
+  --background-color: #1a1a1a;
+  --text-color: #ffffff;
+  --error-color: #ef4444;
+  --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  --card-background: #2d2d2d;
+  --glow-color1: #ff0000;
+  --glow-color2: #00ff00;
+  --glow-color3: #0000ff;
+  --glow-spread: 15px;
+  --m: 1rem;
+  --red: #FF6565;
+  --pink: #FF64F9;
+  --purple: #6B5FFF;
+  --blue: #4D8AFF;
+  --green: #5BFF89;
+  --yellow: #FFEE55;
+  --orange: #FF6D1B;
+  --color1: #B071FF;
+  --color2: #FF9C71;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  line-height: 1.5;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -4;
+  background-color: #0b0b0b;
+}
+
+h1 {
+  color: var(--primary-color);
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+button {
+  border: calc(0.08 * var(--m)) solid transparent;
+  position: relative;
+  color: var(--text-color);
+  font-family: 'Space Grotesk', system-ui;
+  font-size: calc(0.6 * var(--m));
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  background: linear-gradient(var(--background-color), var(--background-color)), 
+              linear-gradient(var(--background-color) 50%, rgba(18, 18, 19, 0.6) 80%, rgba(18, 18, 19, 0)),  
+              linear-gradient(90deg, var(--orange), var(--yellow), var(--green), var(--blue), var(--purple), var(--pink), var(--red));
+  background-origin: border-box;
+  background-clip: padding-box, border-box, border-box;
+  background-size: 200%;
+  animation: animate 2s infinite linear;
+  transition: transform 0.2s;
+}
+
+button::before {
+  content: '';
+  background: linear-gradient(90deg, var(--orange), var(--yellow), var(--green), var(--blue), var(--purple), var(--pink), var(--red));
+  height: 30%;
+  width: 60%;
+  position: absolute;
+  bottom: -20%;
+  z-index: -5;
+  background-size: 200%;
+  animation: animate 2s infinite linear;
+  filter: blur(calc(0.8 * var(--m)));
+}
+
+button:hover {
+  transform: translateY(-2px);
+}
+
+button:hover, 
+button:hover::before {
+  animation: animate 0.5s infinite linear;
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+input {
+  font-size: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--secondary-color);
+  border-radius: 8px;
+  width: 100%;
+  transition: all 0.2s;
+  background: var(--card-background);
+  color: var(--text-color);
+}
+
+input:hover {
+  box-shadow: 0 0 15px rgba(0, 123, 255, 0.2);
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 25px rgba(0, 123, 255, 0.3);
+}
+
+@keyframes animate {
+  0% { background-position: 0 }
+  100% { background-position: 200% }
+}
+
+@keyframes colorChange {
+  0%, 100% { fill: var(--color1); }
+  50% { fill: var(--color2); }
+}
+
+@keyframes breathing {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-color: #0f172a;
+    --text-color: #f8fafc;
+    --secondary-color: #94a3b8;
+  }
+
+  input {
+    background-color: #1e293b;
+    color: var(--text-color);
+  }
+}
+
+@media screen and (max-width: 1000px) {
+  :root {
+    --m: 0.8rem;
+  }
+}
+
+<<<<<<< HEAD
+@media (max-width: 768px) {
+  :root {
+    --m: 0.75rem;
+  }
+
+  body {
+    font-size: 14px;
+  }
+
+  h1 {
+    font-size: 1.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  button {
+    padding: 0.6rem 1.2rem;
+    font-size: calc(0.55 * var(--m));
+  }
+
+  .search-page {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --m: 0.7rem;
+  }
+
+  .search-container {
+    padding: 0.75rem;
+  }
+}
+
+=======
+>>>>>>> 31221af (git fix)
+.search-page {
+  position: relative;
+  z-index: 5;  /* Increased to be above blur layer */
+  min-height: 100vh;
+  width: 100%;
+}

@@ -1,0 +1,66 @@
+@import url(https://fonts.googleapis.com/css?family=Source+Code+Pro:400);
+
+.loader-wrapper {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  font-family: 'Source Code Pro', monospace;
+  font-weight: 400;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.word {
+  position: relative;
+  color: #fff;
+  font-size: 2.5em;
+  height: 2.5em;
+  line-height: 2.5em;
+  animation: colorCycle 3s linear infinite;
+}
+
+.word::before {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 0;
+  filter: blur(8px);
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+}
+
+.word span {
+  display: inline-block;
+}
+
+.word .done {
+  animation: colorCycle 3s linear infinite;
+}
+
+.loader-container {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .word {
+    font-size: 2em;
+  }
+}
+
+@keyframes colorCycle {
+  0% { color: #FF6565; }  /* Red */
+  16.6% { color: #FF64F9; }  /* Pink */
+  33.2% { color: #6B5FFF; }  /* Purple */
+  49.8% { color: #4D8AFF; }  /* Blue */
+  66.4% { color: #5BFF89; }  /* Green */
+  83% { color: #FFEE55; }  /* Yellow */
+  100% { color: #FF6565; }  /* Back to red */
+}

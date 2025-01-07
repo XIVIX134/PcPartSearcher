@@ -1,0 +1,22 @@
+# ignore all json files except specific ones
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!tsconfig.app.json
+!tsconfig.node.json
+
+# ignore all pycache folders
+__pycache__/
+server/api/routes/__pycache__/
+server/api/controllers/__pycache__/
+server/api/__pycache__/
+scarpers/__pycache__/
+
+# ignore node_modules
+/client/node_modules
+PcPartSearcher.code-workspace
+
+
+amazon_debug.html
+scrapers/amazon/amazon_response.html

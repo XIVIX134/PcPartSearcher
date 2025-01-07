@@ -1,5 +1,5 @@
 from flask import Blueprint
-from ...controllers.search.search_controller import search_products
+from ...controllers.general_search.search_controller import search_products
 
 search_bp = Blueprint('search_bp', __name__)
 

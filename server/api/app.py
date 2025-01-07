@@ -17,7 +17,7 @@ if project_root not in sys.path:
 
 from server.api.routes.olx.olx_route import olx_bp
 from server.api.routes.sigma.sigma_route import sigma_bp
-from server.api.routes.search.search_route import search_bp
+from server.api.routes.general_search.search_route import search_bp
 from server.api.routes.badr.badr_route import badr_bp  
 from server.api.routes.amazon.amazon_route import amazon_bp  
 

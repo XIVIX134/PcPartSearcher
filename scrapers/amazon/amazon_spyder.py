@@ -129,9 +129,3 @@ class AmazonSpyder:
             return [r for r in results if r.get('Page') == page]
         return results
 
-if __name__ == "__main__":
-    scraper = AmazonSpyder()
-    search_results = scraper.search_products("rtx")
-    with open("amazon.json", "w", encoding='utf-8') as file:
-        json.dump(search_results, ensure_ascii=False, indent=4)
-

@@ -1,7 +1,6 @@
 import aiohttp
 import asyncio
 from bs4 import BeautifulSoup
-import json
 import logging
 from typing import List, Dict, Any, Optional
 

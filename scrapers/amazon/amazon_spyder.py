@@ -16,6 +16,7 @@ class AmazonSpyder:
         Returns:
             str: JSON string containing product details.
         """
+        # url = "https://www.amazon.eg/s?k={search_term}&crid=25ZTFGDJ21GUD&sprefix=hp%2Caps%2C197&ref=nb_sb_noss_1"
         url = f"https://www.amazon.eg/s?k={search_term}"
         headers = {
             "Accept-Language": "en-US,en;q=0.9",

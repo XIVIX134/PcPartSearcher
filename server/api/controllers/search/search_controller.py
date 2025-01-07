@@ -46,7 +46,8 @@ def search_products():
         sigma_results = scrape_sigma_computer(search_term)
         
         # Get Amazon results
-        amazon_raw_results = AmazonSpyder().search_products(search_term)
+        amazon_spyder = AmazonSpyder()
+        amazon_raw_results = amazon_spyder.search_products(search_term)
 
         # Transform sigma results to match product format
         transformed_sigma = []
@@ -66,12 +67,12 @@ def search_products():
         transformed_amazon = []
         for item in amazon_raw_results:
             transformed_amazon.append({
-                'Product ID': 'N/A',
+                'Product ID': 'AMZ-' + str(hash(item['title']))[:8],
                 'Title': item['title'],
                 'Price': item['price'],
                 'Location': 'Amazon.eg',
                 'Image URL': item['image'],
-                'Details Link': item['link'],
+                'Details Link': item['link'] or '#',
                 'Description': '',
                 'rating': item['rating'],
                 'stock': 'In Stock'  # Amazon typically only shows in-stock items
@@ -84,8 +85,6 @@ def search_products():
             'amazon': transformed_amazon,
             'totalPages': (len(olx_results) + len(transformed_sigma) + len(transformed_amazon)) // 24 + 
                         (1 if (len(olx_results) + len(transformed_sigma) + len(transformed_amazon)) % 24 > 0 else 0),
-            # 'totalPages': (len(olx_results) + len(transformed_sigma)) // 24 + 
-            #             (1 if (len(olx_results) + len(transformed_sigma)) % 24 > 0 else 0),
             'itemsPerPage': 24,
             'status': 'success'
         }

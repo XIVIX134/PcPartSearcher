@@ -283,6 +283,19 @@
   color: #ffbd17;
 }
 
+.product-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--text-color);
+  opacity: 0.9;
+}
+
+.product-rating span {
+  color: #FFB800;
+}
+
 @media (max-width: 768px) {
   /* Force grid view on mobile */
   .results-list .card-container,

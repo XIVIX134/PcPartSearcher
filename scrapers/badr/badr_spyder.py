@@ -28,7 +28,7 @@ import json
 #         "Referer": "https://www.amazon.com/",
 #         "Accept-Encoding": "gzip, deflate, br",
 #         "Accept-Language": "en-US,en;q=0.8"
-#         }
+# }
 
 class BadrSpyder:
     def __init__(self):

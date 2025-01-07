@@ -75,19 +75,3 @@ def scrape_sigma_computer(search_term):
             print(f"Error parsing product: {e}")
     
     return results
-
-def main(search_term):
-    data = scrape_sigma_computer(search_term)
-
-    # Generate the file name
-    result_file = f"{sanitize_filename(search_term)}.json"
-
-    # Save the results to a JSON file
-    if data:
-        with open(result_file, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
-
-        print(f"Data saved to {result_file}")
-
-if __name__ == "__main__":
-    main("rtx")

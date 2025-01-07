@@ -1,38 +1,29 @@
 import requests
 from bs4 import BeautifulSoup
-import json
 import re
 
-# Sanitize the search term for use in filenames
-def sanitize_filename(search_term):
-    return re.sub(r'[^\w\-]', '_', search_term)
+class SigmaSpyder:
+    def __init__(self, search_term):
+        self.search_term = search_term
+        self.base_url = "https://www.sigma-computer.com/search"
+        self.params = {
+            "search": search_term,
+            "submit_search": "",
+            "route": "product/search"
+        }
 
-def scrape_sigma_computer(search_term):
-    # Define the search URL with the search term
-    base_url = "https://www.sigma-computer.com/search"
-    params = {
-        "search": search_term,
-        "submit_search": "",
-        "route": "product/search"
-    }
-    
-    # Send a GET request
-    response = requests.get(base_url, params=params)
-    
-    # Check if the request was successful
-    if response.status_code != 200:
-        print(f"Failed to fetch data: {response.status_code}")
-        return None
-    
-    # Parse the HTML content
-    soup = BeautifulSoup(response.content, "html.parser")
-    
-    # Find all product blocks
-    product_blocks = soup.find_all("div", class_="product-layout")
-    
-    # Extract product details
-    results = []
-    for product in product_blocks:
+    @staticmethod
+    def sanitize_filename(search_term):
+        return re.sub(r'[^\w\-]', '_', search_term)
+
+    def fetch_data(self):
+        response = requests.get(self.base_url, params=self.params)
+        if response.status_code != 200:
+            print(f"Failed to fetch data: {response.status_code}")
+            return None
+        return response.content
+
+    def parse_product(self, product):
         try:
             title = product.find("h4").text.strip()
             link = product.find("h4").find("a")["href"]
@@ -43,7 +34,6 @@ def scrape_sigma_computer(search_term):
             description_elements = product.find("div", class_="description").find_all("div")
             description = "\n".join([desc.text.strip() for desc in description_elements if desc.text.strip()])
             
-            # Improved stock detection
             stock_status = "Unknown"
             stock_element = product.find("span", class_="stock")
             if stock_element:
@@ -53,7 +43,6 @@ def scrape_sigma_computer(search_term):
                 elif "غير متوفر" in status_text or "out of stock" in status_text:
                     stock_status = "Out of Stock"
                 else:
-                    # Try alternative stock indicator
                     stock_span = product.find("span", class_="stock_Y") or product.find("span", class_="stock_N")
                     if stock_span:
                         if "stock_Y" in stock_span.get("class", []):
@@ -61,8 +50,7 @@ def scrape_sigma_computer(search_term):
                         elif "stock_N" in stock_span.get("class", []):
                             stock_status = "Out of Stock"
             
-            # Append to results with improved stock status
-            results.append({
+            return {
                 "title": title,
                 "link": f"https://www.sigma-computer.com/{link}",
                 "image": f"https://www.sigma-computer.com/{image}",
@@ -70,8 +58,28 @@ def scrape_sigma_computer(search_term):
                 "price_old": price_old,
                 "stock": stock_status,
                 "description": description
-            })
+            }
         except Exception as e:
             print(f"Error parsing product: {e}")
-    
-    return results
+            return None
+
+    def scrape(self):
+        content = self.fetch_data()
+        if not content:
+            return None
+        
+        soup = BeautifulSoup(content, "html.parser")
+        product_blocks = soup.find_all("div", class_="product-layout")
+        
+        results = []
+        for product in product_blocks:
+            product_data = self.parse_product(product)
+            if product_data:
+                results.append(product_data)
+        
+        return results
+
+# Example usage:
+# spyder = SigmaSpyder("laptop")
+# results = spyder.scrape()
+# print(results)

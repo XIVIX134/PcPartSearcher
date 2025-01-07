@@ -102,13 +102,13 @@ class BadrSpyder:
         return json.dumps(products)
 
 # Example usage
-if __name__ == '__main__':
-    spyder = BadrSpyder()
-    search_results = spyder.search("rtx")
+# if __name__ == '__main__':
+#     spyder = BadrSpyder()
+#     search_results = spyder.search("rtx")
 
-    parsed_results = json.loads(search_results)
+#     parsed_results = json.loads(search_results)
 
-    with open("badr.json", 'w', encoding='utf-8') as f:
-        json.dump(parsed_results, f, ensure_ascii=False, indent=4)
+#     with open("badr.json", 'w', encoding='utf-8') as f:
+#         json.dump(parsed_results, f, ensure_ascii=False, indent=4)
 
-    print("Data successfully written to badr.json")
+#     print("Data successfully written to badr.json")

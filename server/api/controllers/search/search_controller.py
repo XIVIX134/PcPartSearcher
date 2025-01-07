@@ -4,8 +4,8 @@ import os
 import sys
 import logging
 import traceback
-from scrapers.olx.olx_spyder import scrape_olx
-from scrapers.sigma.sigma_spyder import scrape_sigma_computer
+from scrapers.olx.olx_spyder import OLX_Spyder
+from scrapers.sigma.sigma_spyder import SigmaSpyder
 from scrapers.amazon.amazon_spyder import AmazonSpyder  # Add this import
 
 # Configure logging with more details
@@ -24,6 +24,8 @@ def search_products():
     try:
         logger.info("Received search request")
         
+        ####### Validate request data #######
+        
         if request.method == 'OPTIONS':
             response = make_response()
             response.headers.add('Access-Control-Allow-Methods', 'POST, OPTIONS')
@@ -40,14 +42,22 @@ def search_products():
         search_term = data.get('searchTerm')
         if not search_term or not isinstance(search_term, str):
             raise ValueError("Invalid or missing searchTerm")
+        
+        ####### Scraping data from different sources #######
 
-        # Get results from all sources
-        olx_results = scrape_olx(search_term)
-        sigma_results = scrape_sigma_computer(search_term)
+        # Get results from olx
+        olx_spyder = OLX_Spyder(search_term)
+        olx_results = olx_spyder.scrape()
+        
+         # Get results from sigma
+        sigma_spyder = SigmaSpyder(search_term)
+        sigma_results = sigma_spyder.scrape()
         
         # Get Amazon results
         amazon_spyder = AmazonSpyder()
-        amazon_raw_results = amazon_spyder.search_products(search_term)
+        amazon_raw_results = amazon_spyder.scrap(search_term)
+        
+        ######## Parsing results ########
 
         # Transform sigma results to match product format
         transformed_sigma = []
@@ -77,6 +87,8 @@ def search_products():
                 'rating': item['rating'],
                 'stock': 'In Stock'  # Amazon typically only shows in-stock items
             })
+        
+        ######## Return response ########
         
         response_data = {
             'olx': olx_results,

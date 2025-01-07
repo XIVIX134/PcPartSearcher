@@ -118,7 +118,7 @@ class AmazonSpyder:
             
             return all_results
 
-    def search_products(self, search_term: str, page: int = 1) -> List[Dict[str, Any]]:
+    def scrap(self, search_term: str, page: int = 1) -> List[Dict[str, Any]]:
         """Synchronous wrapper for async scraping"""
         results = asyncio.run(self.search_products_async(search_term))
         

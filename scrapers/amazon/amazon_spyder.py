@@ -37,7 +37,6 @@ class AmazonSpyder:
 
         for card in product_cards:
             try:
-                # Extract the title
                 title = card.find("h2").text.strip() if card.find("h2") else "N/A"
 
                 link_div = card.find("div", class_="a-section a-spacing-none a-spacing-top-small s-title-instructions-style")
@@ -71,18 +70,18 @@ class AmazonSpyder:
                 continue
 
 
-
+        return products
         # return products
-        return json.dumps(products)
+        # return json.dumps(products)
 
-# Example usage
-if __name__ == "__main__":
-    scraper = AmazonSpyder()
-    search_results = scraper.search_products("rtx 3080")
+# # Example usage
+# if __name__ == "__main__":
+#     scraper = AmazonSpyder()
+#     search_results = scraper.search_products("rtx 3080")
 
-    parsed_results = json.loads(search_results)
+#     parsed_results = json.loads(search_results)
 
-    with open("amazon.json", 'w', encoding='utf-8') as f:
-        json.dump(parsed_results, f, ensure_ascii=False, indent=4)
+#     with open("amazon.json", 'w', encoding='utf-8') as f:
+#         json.dump(parsed_results, f, ensure_ascii=False, indent=4)
 
-    # print(json.dumps(parsed_results, ensure_ascii=False, indent=4))
+#     # print(json.dumps(parsed_results, ensure_ascii=False, indent=4))

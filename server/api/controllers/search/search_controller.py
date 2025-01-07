@@ -45,9 +45,8 @@ def search_products():
         olx_results = scrape_olx(search_term)
         sigma_results = scrape_sigma_computer(search_term)
         
-        # # Get Amazon results
-        # amazon_scraper = AmazonSpyder()
-        # amazon_raw_results = amazon_scraper.search_products(search_term)
+        # Get Amazon results
+        amazon_raw_results = AmazonSpyder().search_products(search_term)
 
         # Transform sigma results to match product format
         transformed_sigma = []
@@ -63,35 +62,35 @@ def search_products():
                 'stock': item.get('stock', 'Unknown')  # Add stock info
             })
 
-        # # Transform amazon results to match product format
-        # transformed_amazon = []
-        # for item in amazon_raw_results:
-        #     transformed_amazon.append({
-        #         'Product ID': item['title'][:20] if item['title'] else 'N/A',
-        #         'Title': item['title'],
-        #         'Price': item['price'],
-        #         'Location': 'Amazon.eg',
-        #         'Image URL': item['image'],
-        #         'Details Link': item['link'],
-        #         'Description': '',
-        #         'rating': item['rating'],
-        #         'stock': 'In Stock'  # Amazon typically only shows in-stock items
-        #     })
+        # Transform amazon results to match product format
+        transformed_amazon = []
+        for item in amazon_raw_results:
+            transformed_amazon.append({
+                'Product ID': 'N/A',
+                'Title': item['title'],
+                'Price': item['price'],
+                'Location': 'Amazon.eg',
+                'Image URL': item['image'],
+                'Details Link': item['link'],
+                'Description': '',
+                'rating': item['rating'],
+                'stock': 'In Stock'  # Amazon typically only shows in-stock items
+            })
         
         response_data = {
             'olx': olx_results,
             'badr': [],
             'sigma': transformed_sigma,
-            # 'amazon': transformed_amazon,
-            # 'totalPages': (len(olx_results) + len(transformed_sigma) + len(transformed_amazon)) // 24 + 
-            #             (1 if (len(olx_results) + len(transformed_sigma) + len(transformed_amazon)) % 24 > 0 else 0),
-            'totalPages': (len(olx_results) + len(transformed_sigma)) // 24 + 
-                        (1 if (len(olx_results) + len(transformed_sigma)) % 24 > 0 else 0),
+            'amazon': transformed_amazon,
+            'totalPages': (len(olx_results) + len(transformed_sigma) + len(transformed_amazon)) // 24 + 
+                        (1 if (len(olx_results) + len(transformed_sigma) + len(transformed_amazon)) % 24 > 0 else 0),
+            # 'totalPages': (len(olx_results) + len(transformed_sigma)) // 24 + 
+            #             (1 if (len(olx_results) + len(transformed_sigma)) % 24 > 0 else 0),
             'itemsPerPage': 24,
             'status': 'success'
         }
         
-        logger.info(f"Search completed successfully. Found {len(olx_results) + len(transformed_sigma)} results")
+        logger.info(f"Search completed successfully. Found {len(olx_results) + len(transformed_sigma)+ len(transformed_amazon)} results")
         return jsonify(response_data)
 
     except Exception as e:

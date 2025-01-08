@@ -39,6 +39,7 @@ class Run_All:
                 mode.append("Development")
             if args.host:
                 mode.append("Hosted")
+                
             print(f"Frontend Mode: {' + '.join(mode)}")
             
             frontend_process = self.run_frontend(npm_path, node_path, use_host=args.host, prod=args.prod)

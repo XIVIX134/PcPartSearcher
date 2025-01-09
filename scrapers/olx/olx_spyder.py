@@ -12,6 +12,19 @@ logger = logging.getLogger(__name__)
 BASE_URL = "https://www.dubizzle.com.eg"
 BATCH_SIZE = 5  # Number of concurrent requests
 
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/109.0",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.5",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Connection": "keep-alive",
+    "Upgrade-Insecure-Requests": "1",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
+}
+
 class OLX_Spyder:
     def __init__(self, search_term: str):
         self.search_term = search_term.replace(' ', '-')
@@ -21,7 +34,7 @@ class OLX_Spyder:
     async def fetch_page(self, session: aiohttp.ClientSession, url: str, page: int) -> Optional[List[Dict[str, Any]]]:
         """Fetches and parses a single page"""
         try:
-            async with session.get(url) as response:
+            async with session.get(url, headers=HEADERS) as response:  # Use headers
                 if response.status == 404:
                     logger.info(f"Page {page} not found (404)")
                     return None
@@ -125,6 +138,6 @@ class OLX_Spyder:
         return results
 
 # Example usage:
-# scraper = OLXScraper("laptop")
+# scraper = OLX_Spyder("laptop")
 # results = scraper.scrape()
 # print(results)

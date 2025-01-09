@@ -2,6 +2,7 @@ import aiohttp
 import asyncio
 from bs4 import BeautifulSoup
 import json
+from urllib.parse import urlparse, unquote
 
 class ALFrensia_Spyder:
     def __init__(self):
@@ -18,6 +19,26 @@ class ALFrensia_Spyder:
             "Sec-Fetch-Site": "none",
             "Sec-Fetch-User": "?1",
         }
+
+    
+
+    def extract_title_from_url(self, url):
+        """
+        Extracts a formatted title from a product URL.
+        """
+        try:
+            # Parse the URL to get the path and decode it
+            path = urlparse(url).path
+            slug = path.strip("/").split("/")[-1]  # Get the last segment
+            slug = unquote(slug)  # Decode any percent-encoded characters
+            
+            # Replace hyphens with spaces and capitalize the result
+            title = slug.replace("-", " ").title()
+            return title
+        except Exception as e:
+            print(f"Error parsing title from URL: {e}")
+            return "No Title"
+
 
     async def scrap(self, search_term):
         """
@@ -42,48 +63,48 @@ class ALFrensia_Spyder:
                     html = await response.text()
                     soup = BeautifulSoup(html, 'html.parser')
 
-                    col_large_9 = soup.find("div", class_="col large-9")
-                    if not col_large_9:
-                        print("Product container not found")
+                    # Find the product container
+                    product_container = soup.find("div", class_="col large-9")
+                    if not product_container:
+                        print("No product container found.")
                         return []
 
-                    product_divs = col_large_9.find_all(
-                        "div", class_="product-small col has-hover product type-product"
-                    )
-                    print(f"Found {len(product_divs)} products")
+                    products = []
+                    # Find individual product cards
+                    product_cards = product_container.find_all("div", class_="product-small")
 
-                    results = []
-                    for product in product_divs:
-                        try:
-                            title = product.find("a", {"aria-label": True})["aria-label"]
-                            product_url = product.find("a", {"aria-label": True})["href"]
-                            image_url = product.find("img")["src"]
-                            status = "Out of Stock" if "out-of-stock" in product.get("class", []) else "In Stock"
+                    for card in product_cards:
+                        title_elem = card.find("a", class_="woocommerce-LoopProduct-link")
+                        url = title_elem["href"] if title_elem and "href" in title_elem.attrs else "No URL"
 
-                            results.append({
-                                "title": title,
-                                "product_url": product_url,
-                                "image_url": image_url,
-                                "status": status,
-                            })
-                        except Exception as e:
-                            print(f"Error parsing product: {e}")
+                        # Extract title from <a> title or fallback to URL parsing
+                        title = title_elem.get("title", "").strip() if title_elem and title_elem.get("title") else self.extract_title_from_url(url)
 
-                    return results
+                        image_elem = card.find("img")
+                        image_url = image_elem["src"] if image_elem and "src" in image_elem.attrs else "No Image URL"
+
+                        stock_status = "In Stock" if "instock" in card["class"] else "Out of Stock"
+
+                        products.append({
+                            "title": title,
+                            "url": url,
+                            "image_url": image_url,
+                            "stock_status": stock_status
+                        })
+
+                    return products
+
             except Exception as e:
                 print(f"An error occurred: {e}")
                 return []
 
-# Example usage
+
 async def main():
-    spyder = ALFrensia_Spyder()
+    spider = ALFrensia_Spyder()
     search_term = "rtx"
-    results = await spyder.scrap(search_term)
+    products = await spider.scrap(search_term)
+    with open('alfrensia_products.json', 'w') as f:
+        f.write(json.dumps(products, indent=2))
 
-    output_file = f"alfrensia_{search_term.replace('+', '_')}.json"
-    with open(output_file, "w") as f:
-        json.dump(results, f, indent=4)
-        print(f"Results saved to {output_file}")
 
-# Run the asynchronous scraper
-# asyncio.run(main())
+asyncio.run(main())

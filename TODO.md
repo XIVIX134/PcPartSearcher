@@ -3,6 +3,9 @@
   - Asser:
     - [ ] Add Categories
     - [ ] Add keywords
+    - [ ] Add NavBar
+    - [ ] Add Advanced Search
+    - [ ] Add Searching Indicator
 # Backend
   - Loay:
     - [ ] Improve el badr's spyder

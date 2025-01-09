@@ -48,7 +48,7 @@ class ALFrensia_Spyder:
                     for card in product_cards:
                         title_elem = card.find("a", class_="woocommerce-LoopProduct-link")
                         url = title_elem["href"] if title_elem and "href" in title_elem.attrs else "No URL"
-                        title = title_elem.get("title", "").strip() if title_elem else self.extract_title_from_url(url)
+                        title = self.extract_title_from_url(url)
                         
                         image_elem = card.find("img")
                         image_url = image_elem["src"] if image_elem else "No Image URL"
@@ -74,12 +74,12 @@ class ALFrensia_Spyder:
                 return []
 
 
-# async def main():
-#     spider = ALFrensia_Spyder()
-#     search_term = "rtx"
-#     products = await spider.scrap(search_term)
-#     with open('alfrensia_products.json', 'w') as f:
-#         f.write(json.dumps(products, indent=2))
+async def main():
+    spider = ALFrensia_Spyder()
+    search_term = "rtx"
+    products = await spider.scrap(search_term)
+    with open('alfrensia_products.json', 'w') as f:
+        f.write(json.dumps(products, indent=2))
 
 
-# asyncio.run(main())
+asyncio.run(main())

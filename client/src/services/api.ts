@@ -2,15 +2,15 @@ import axios from 'axios';
 import type { SearchResponse } from '../types';
 
 const api = axios.create({
-  baseURL: '/api', // Use relative path for proxy
+  baseURL: '/api',
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 30000,
+  timeout: 60000,
   withCredentials: false
 });
 
-// Add request/response interceptors
+// TODO: in production remove console.log statements
 api.interceptors.request.use(config => {
   console.log('>>> Sending request:', config.method?.toUpperCase(), config.url);
   return config;
@@ -29,7 +29,6 @@ api.interceptors.response.use(
 
 export const searchProducts = async (searchTerm: string): Promise<SearchResponse> => {
   try {
-    console.log('Sending search request for:', searchTerm);
     const response = await api.post('/search', { searchTerm });
     return response.data;
   } catch (error: unknown) {

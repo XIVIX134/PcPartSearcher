@@ -119,7 +119,7 @@ class OLX_Spyder:
         results = asyncio.run(self.scrape_olx_async())
         
         # Sort results by page
-        results.sort(key=lambda x: x.get('Page', 1))
+        results.sort(key=lambda i: i.get('Page', 1))
         if page > 1:
             return [r for r in results if r.get('Page') == page]
         return results

@@ -40,68 +40,70 @@ def search_products():
         logger.info(f"Request data: {data}")
         
         search_term = data.get('searchTerm')
+        source_filters = data.get('sourceFilters', {})
+
         if not search_term or not isinstance(search_term, str):
             raise ValueError("Invalid or missing searchTerm")
-        
-        ####### Scraping data from different sources #######
 
-        # Get results from olx
-        olx_spyder = OLX_Spyder(search_term)
-        olx_results = olx_spyder.scrape()
-        
-         # Get results from sigma
-        sigma_spyder = SigmaSpyder(search_term)
-        sigma_results = sigma_spyder.scrape()
-        
-        # Get Amazon results
-        amazon_spyder = AmazonSpyder()
-        amazon_raw_results = amazon_spyder.scrap(search_term)
-        
-        ######## Parsing results ########
+        results = {
+            'olx': [],
+            'badr': [],
+            'sigma': [],
+            'amazon': [],
+        }
 
-        # Transform sigma results to match product format
-        transformed_sigma = []
-        for item in sigma_results or []:
-            transformed_sigma.append({
-                'Product ID': item.get('link', '').split('/')[-1],
-                'Title': item.get('title', ''),
-                'Price': item.get('price_new', ''),
-                'Location': 'Sigma Computer',
-                'Image URL': item.get('image', ''),
-                'Details Link': item.get('link', ''),
-                'Description': item.get('description', ''),
-                'stock': item.get('stock', 'Unknown')  # Add stock info
-            })
+        # Only scrape enabled sources
+        if source_filters.get('olx'):
+            olx_spyder = OLX_Spyder(search_term)
+            results['olx'] = olx_spyder.scrape()
 
-        # Transform amazon results to match product format
-        transformed_amazon = []
-        for item in amazon_raw_results:
-            transformed_amazon.append({
-                'Product ID': 'AMZ-' + str(hash(item['title']))[:8],
-                'Title': item['title'],
-                'Price': item['price'],
-                'Location': 'Amazon.eg',
-                'Image URL': item['image'],
-                'Details Link': item['link'] or '#',
-                'Description': '',
-                'rating': item['rating'],
-                'stock': 'In Stock'  # Amazon typically only shows in-stock items
-            })
-        
+        if source_filters.get('sigma'):
+            sigma_spyder = SigmaSpyder(search_term)
+            sigma_results = sigma_spyder.scrape()
+            transformed_sigma = []
+            for item in sigma_results or []:
+                transformed_sigma.append({
+                    'Product ID': item.get('link', '').split('/')[-1],
+                    'Title': item.get('title', ''),
+                    'Price': item.get('price_new', ''),
+                    'Location': 'Sigma Computer',
+                    'Image URL': item.get('image', ''),
+                    'Details Link': item.get('link', ''),
+                    'Description': item.get('description', ''),
+                    'stock': item.get('stock', 'Unknown')  # Add stock info
+                })
+            results['sigma'] = transformed_sigma
+
+        if source_filters.get('amazon'):
+            amazon_spyder = AmazonSpyder()
+            amazon_raw_results = amazon_spyder.scrap(search_term)
+            transformed_amazon = []
+            for item in amazon_raw_results:
+                transformed_amazon.append({
+                    'Product ID': 'AMZ-' + str(hash(item['title']))[:8],
+                    'Title': item['title'],
+                    'Price': item['price'],
+                    'Location': 'Amazon.eg',
+                    'Image URL': item['image'],
+                    'Details Link': item['link'] or '#',
+                    'Description': '',
+                    'rating': item['rating'],
+                    'stock': 'In Stock'  # Amazon typically only shows in-stock items
+                })
+            results['amazon'] = transformed_amazon
+
         ######## Return response ########
         
+        total_items = sum(len(items) for items in results.values())
+        
         response_data = {
-            'olx': olx_results,
-            'badr': [],
-            'sigma': transformed_sigma,
-            'amazon': transformed_amazon,
-            'totalPages': (len(olx_results) + len(transformed_sigma) + len(transformed_amazon)) // 24 + 
-                        (1 if (len(olx_results) + len(transformed_sigma) + len(transformed_amazon)) % 24 > 0 else 0),
+            **results,
+            'totalPages': (total_items // 24) + (1 if total_items % 24 > 0 else 0),
             'itemsPerPage': 24,
             'status': 'success'
         }
         
-        logger.info(f"Search completed successfully. Found {len(olx_results) + len(transformed_sigma)+ len(transformed_amazon)} results")
+        logger.info(f"Search completed successfully. Found {total_items} results")
         return jsonify(response_data)
 
     except Exception as e:

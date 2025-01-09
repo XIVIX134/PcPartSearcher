@@ -27,9 +27,14 @@ api.interceptors.response.use(
   }
 );
 
-export const searchProducts = async (searchTerm: string): Promise<SearchResponse> => {
+interface SearchParams {
+  searchTerm: string;
+  sourceFilters: Record<string, boolean>;
+}
+
+export const searchProducts = async ({ searchTerm, sourceFilters }: SearchParams): Promise<SearchResponse> => {
   try {
-    const response = await api.post('/search', { searchTerm });
+    const response = await api.post('/search', { searchTerm, sourceFilters });
     return response.data;
   } catch (error: unknown) {
     console.error('Search error:', error);

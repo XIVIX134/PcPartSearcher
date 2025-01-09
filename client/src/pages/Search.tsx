@@ -8,6 +8,8 @@ import type { Product, SourceType, StockFilter as StockFilterType } from '../typ
 import '../styles/Search.css';
 import { generateUID } from '../utils/uid';
 import { FiltersBar } from '../components/FiltersBar';
+import { AdvancedSearchModal } from '../components/AdvancedSearchModal';
+import { getCookie } from '../utils/cookies';
 
 interface SourceFilters {
   olx: boolean;
@@ -32,13 +34,14 @@ export const SearchPage: React.FC = () => {
   const [stockFilter, setStockFilter] = useState<StockFilterType>('all');
   const [isFiltersVisible, setIsFiltersVisible] = useState(false);
   const [gridSize, setGridSize] = useState(4);
+  const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['search', submittedTerm],
+    queryKey: ['search', submittedTerm, sourceFilters],
     queryFn: async () => {
       setIsSearching(true);
       try {
-        return await searchProducts(submittedTerm); // Remove pages argument
+        return await searchProducts({ searchTerm: submittedTerm, sourceFilters });
       } finally {
         setIsSearching(false);
       }
@@ -153,6 +156,16 @@ export const SearchPage: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Load preferences from cookies on mount
+  useEffect(() => {
+    const savedPreferences = getCookie('searchPreferences');
+    if (savedPreferences) {
+      if (savedPreferences.sourceFilters) {
+        setSourceFilters(savedPreferences.sourceFilters);
+      }
+    }
+  }, []);
+
   return (
     <div className="search-page">
       <div className={`search-container ${hasResults ? 'has-results' : ''}`}>
@@ -167,9 +180,37 @@ export const SearchPage: React.FC = () => {
               placeholder="Search for PC parts..."
               className="search-input"
             />
-            <button type="submit" className="search-button" disabled={isLoading}>
-              Search
-            </button>
+            <div className="button-group">
+              <button 
+                type="button"
+                className="advanced-search-button"
+                onClick={() => setIsAdvancedSearchOpen(true)}
+                title="Advanced Search"
+              >
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                >
+                  <line x1="4" y1="21" x2="4" y2="14" />
+                  <line x1="4" y1="10" x2="4" y2="3" />
+                  <line x1="12" y1="21" x2="12" y2="12" />
+                  <line x1="12" y1="8" x2="12" y2="3" />
+                  <line x1="20" y1="21" x2="20" y2="16" />
+                  <line x1="20" y1="12" x2="20" y2="3" />
+                  <line x1="1" y1="14" x2="7" y2="14" />
+                  <line x1="9" y1="8" x2="15" y2="8" />
+                  <line x1="17" y1="16" x2="23" y2="16" />
+                </svg>
+              </button>
+              <button type="submit" className="search-button" disabled={isLoading}>
+                Search
+              </button>
+            </div>
           </div>
         </form>
 
@@ -249,6 +290,13 @@ export const SearchPage: React.FC = () => {
           </div>
         )}
       </div>
+      <AdvancedSearchModal
+        isOpen={isAdvancedSearchOpen}
+        onClose={() => setIsAdvancedSearchOpen(false)}
+        sourceFilters={sourceFilters}
+        onSourceFilterChange={handleFilterChange}
+        onSearch={handleSubmit}
+      />
     </div>
   );
 };

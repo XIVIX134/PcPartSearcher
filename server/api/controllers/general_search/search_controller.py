@@ -39,11 +39,17 @@ def search_products():
         data = request.get_json()
         logger.info(f"Request data: {data}")
         
-        search_term = data.get('searchTerm')
-        source_filters = data.get('sourceFilters', {})
+        # Update to use search_term instead of searchTerm
+        search_term = data.get('search_term')
+        source_filters = data.get('source_filters', {})
 
-        if not search_term or not isinstance(search_term, str):
-            raise ValueError("Invalid or missing searchTerm")
+        # Better validation for search_term
+        if not search_term or not isinstance(search_term, str) or len(search_term.strip()) < 2:
+            logger.error(f"Invalid search term: {search_term}")
+            return jsonify({
+                'error': 'Invalid search term',
+                'message': 'Search term must be a string with at least 2 characters'
+            }), 400
 
         results = {
             'olx': [],

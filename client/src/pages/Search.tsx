@@ -1,22 +1,27 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { searchProducts } from '../services/api';
 import { ProductCard } from '../components/ProductCard';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { SourceFilters } from '../components/SourceFilters';
 import type { Product, SourceType, StockFilter as StockFilterType } from '../types';
+interface SearchResponse {
+  olx: Product[];
+  badr: Product[];
+  sigma: Product[];
+  amazon: Product[];
+  alfrensia: Product[];
+  totalPages: number;
+  itemsPerPage: number;
+  status: string;
+}
 import '../styles/Search.css';
-import { generateUID } from '../utils/uid';
 import { FiltersBar } from '../components/FiltersBar';
 import { AdvancedSearchModal } from '../components/AdvancedSearchModal';
 import { getCookie } from '../utils/cookies';
+import { normalizeProduct, normalizePrice } from '../utils/productUtils';
 
-interface SourceFilters {
-  olx: boolean;
-  badr: boolean;
-  sigma: boolean;
-  amazon: boolean;
-}
+type SourceFilters = Record<SourceType, boolean>;
 
 export const SearchPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -29,78 +34,168 @@ export const SearchPage: React.FC = () => {
     olx: true,
     badr: true,
     sigma: true,
-    amazon: true
+    amazon: true,
+    alfrensia: true
   });
   const [stockFilter, setStockFilter] = useState<StockFilterType>('all');
   const [isFiltersVisible, setIsFiltersVisible] = useState(false);
   const [gridSize, setGridSize] = useState(4);
   const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false);
 
+  // Keep track of which sources have been searched
+  const [searchedSources, setSearchedSources] = useState<Record<SourceType, boolean>>({
+    olx: false,
+    badr: false,
+    sigma: false,
+    amazon: false,
+    alfrensia: false
+  });
+  const [isPartialSearching] = useState(false);
+  const [lastSearchTerm, setLastSearchTerm] = useState('');
+
+
+  // Update handleFilterChange to handle both single source and full filters updates
+  const handleFilterChange = (newFilters: Record<SourceType, boolean> | SourceType) => {
+    if (typeof newFilters === 'string') {
+      // Handle single source toggle
+      setSourceFilters(prev => ({
+        ...prev,
+        [newFilters]: !prev[newFilters]
+      }));
+    } else {
+      // Handle full filters update
+      setSourceFilters(newFilters);
+    }
+  };
+
+  // Modify useQuery to only search new sources
   const { data, isLoading, error } = useQuery({
     queryKey: ['search', submittedTerm, sourceFilters],
     queryFn: async () => {
       setIsSearching(true);
       try {
-        return await searchProducts({ searchTerm: submittedTerm, sourceFilters });
+        // Only include sources that haven't been searched yet
+        const sourcesToSearch = Object.entries(sourceFilters)
+          .filter(([source, enabled]) => {
+            const sourceKey = source as SourceType;
+            return enabled && !searchedSources[sourceKey];
+          })
+          .reduce((acc, [source]) => ({ ...acc, [source]: true }), {});
+
+        // If no new sources to search, return empty results
+        if (Object.keys(sourcesToSearch).length === 0) {
+          return allResults; // Return existing results instead of empty ones
+        }
+
+        const response = await searchProducts({ 
+          searchTerm: submittedTerm.trim(),
+          sourceFilters: sourcesToSearch,
+          isPartial: true  // Add this flag
+        });
+
+        // Mark searched sources
+        const newSearchedSources = { ...searchedSources };
+        Object.keys(sourcesToSearch).forEach(source => {
+          newSearchedSources[source as SourceType] = true;
+        });
+        setSearchedSources(newSearchedSources);
+
+        return response;
+      } catch (err) {
+        console.error('Search error:', err);
+        throw new Error(err instanceof Error ? err.message : 'Search failed');
       } finally {
         setIsSearching(false);
       }
     },
-    enabled: submittedTerm.length > 2,
+    enabled: submittedTerm.trim().length > 2,
   });
+
+  // Reset searched sources when search term changes
+  useEffect(() => {
+    setSearchedSources({
+      olx: false,
+      badr: false,
+      sigma: false,
+      amazon: false,
+      alfrensia: false
+    });
+    // Also reset all results
+    setAllResults({
+      olx: [],
+      badr: [],
+      sigma: [],
+      amazon: [],
+      alfrensia: [],
+      totalPages: 0,
+      itemsPerPage: 24,
+      status: 'idle'
+    });
+  }, [submittedTerm]);
+
+  // Store all fetched results separately
+  const [allResults, setAllResults] = useState<SearchResponse>({
+    olx: [],
+    badr: [],
+    sigma: [],
+    amazon: [],
+    alfrensia: [],
+    totalPages: 0,
+    itemsPerPage: 24,
+    status: 'idle'
+  });
+
+  // Update allResults when new data arrives
+  useEffect(() => {
+    if (data) {
+      setAllResults((prev: SearchResponse) => {
+        // Create a new results object
+        const newResults = { ...prev };
+        
+        // Only update arrays that have new data
+        // This prevents duplicate entries when toggling sources
+        if (data.olx?.length) newResults.olx = data.olx;
+        if (data.badr?.length) newResults.badr = data.badr;
+        if (data.sigma?.length) newResults.sigma = data.sigma;
+        if (data.amazon?.length) newResults.amazon = data.amazon;
+        if (data.alfrensia?.length) newResults.alfrensia = data.alfrensia;
+
+        return {
+          ...newResults,
+          totalPages: data.totalPages || prev.totalPages,
+          itemsPerPage: data.itemsPerPage || prev.itemsPerPage,
+          status: data.status || prev.status
+        };
+      });
+    }
+  }, [data]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm.trim().length > 2) {
+      // If search term changed, reset searched sources
+      if (searchTerm !== lastSearchTerm) {
+        setSearchedSources(Object.fromEntries(
+          Object.keys(sourceFilters).map(source => [source as SourceType, false])
+        ) as Record<SourceType, boolean>);
+        setAllResults({
+          olx: [], badr: [], sigma: [], amazon: [], alfrensia: [],
+          totalPages: 0, itemsPerPage: 24, status: 'idle'
+        });
+      }
+      setLastSearchTerm(searchTerm);
       setSubmittedTerm(searchTerm);
     }
   };
 
-  const handleFilterChange = (source: SourceType) => {
-    setSourceFilters(prev => ({
-      ...prev,
-      [source]: !prev[source]
-    }));
-  };
-
-  const sortProducts = useCallback((products: Product[]) => {
-    // Reset to first page when sorting changes
-    setCurrentPage(1);
-    
-    return [...products].sort((a, b) => {
-      if (sortOption === 'newest') return 0;
-      
-      // Remove currency symbols and commas, then convert to number
-      const priceA = parseFloat(a.Price.replace(/[^\d.]/g, '')) || 0;
-      const priceB = parseFloat(b.Price.replace(/[^\d.]/g, '')) || 0;
-      
-      return sortOption === 'price-asc' ? priceA - priceB : priceB - priceA;
-    });
-  }, [sortOption]);
-
   // Process and sort all products first
   const processedProducts = useMemo(() => {
     let filteredProducts: Product[] = [
-      ...(sourceFilters.olx ? data?.olx?.map(product => ({ 
-        ...product, 
-        source: 'olx' as const,
-        uid: generateUID() 
-      })) || [] : []),
-      ...(sourceFilters.badr ? data?.badr?.map(product => ({ 
-        ...product, 
-        source: 'badr' as const,
-        uid: generateUID()
-      })) || [] : []),
-      ...(sourceFilters.sigma ? data?.sigma?.map(product => ({ 
-        ...product, 
-        source: 'sigma' as const,
-        uid: generateUID()
-      })) || [] : []),
-      ...(sourceFilters.amazon ? data?.amazon?.map(product => ({ 
-        ...product, 
-        source: 'amazon' as const,
-        uid: generateUID()
-      })) || [] : [])
+      ...(sourceFilters.olx ? allResults?.olx?.map(product => normalizeProduct(product, 'olx')) || [] : []),
+      ...(sourceFilters.badr ? allResults?.badr?.map(product => normalizeProduct(product, 'badr')) || [] : []),
+      ...(sourceFilters.sigma ? allResults?.sigma?.map(product => normalizeProduct(product, 'sigma')) || [] : []),
+      ...(sourceFilters.amazon ? allResults?.amazon?.map(product => normalizeProduct(product, 'amazon')) || [] : []),
+      ...(sourceFilters.alfrensia ? allResults?.alfrensia?.map(product => normalizeProduct(product, 'alfrensia')) || [] : []),
     ];
 
     // Apply stock filter
@@ -123,8 +218,17 @@ export const SearchPage: React.FC = () => {
       });
     }
 
-    return sortProducts(filteredProducts);
-  }, [data, sortProducts, sourceFilters, stockFilter]); // Re-sort when data or sortProducts changes
+    // Update price comparison to use normalizer
+    if (sortOption !== 'newest') {
+      filteredProducts.sort((a, b) => {
+        const priceA = normalizePrice(a.Price);
+        const priceB = normalizePrice(b.Price);
+        return sortOption === 'price-asc' ? priceA - priceB : priceB - priceA;
+      });
+    }
+
+    return filteredProducts;
+  }, [allResults, sourceFilters, sortOption, stockFilter]); // Re-sort when data or sortProducts changes
 
   // Then paginate the sorted results
   const paginatedProducts = useMemo(() => {
@@ -208,7 +312,14 @@ export const SearchPage: React.FC = () => {
                 </svg>
               </button>
               <button type="submit" className="search-button" disabled={isLoading}>
-                Search
+                {isPartialSearching ? (
+                  <>
+                    Search
+                    <LoadingSpinner size="small" />
+                  </>
+                ) : (
+                  'Search'
+                )}
               </button>
             </div>
           </div>
@@ -240,7 +351,7 @@ export const SearchPage: React.FC = () => {
               </div>
             </div>
             <div className={`results-layout ${isFiltersVisible ? 'with-filters' : ''}`}>
-              <FiltersBar
+              <FiltersBar 
                 className={isFiltersVisible ? 'visible' : ''}
                 sourceFilters={sourceFilters}
                 stockFilter={stockFilter}
@@ -252,6 +363,7 @@ export const SearchPage: React.FC = () => {
                 onSortChange={setSortOption}
                 onViewChange={setView}
                 onGridSizeChange={setGridSize}
+                searchedSources={searchedSources} // Add this line
               />
               <div className="results-content">
                 <div className={`results-${view}`}>
@@ -290,12 +402,16 @@ export const SearchPage: React.FC = () => {
           </div>
         )}
       </div>
+      {/* Move modal outside container */}
       <AdvancedSearchModal
         isOpen={isAdvancedSearchOpen}
         onClose={() => setIsAdvancedSearchOpen(false)}
+        onSearch={() => handleSubmit({ preventDefault: () => {} } as React.FormEvent)}
         sourceFilters={sourceFilters}
         onSourceFilterChange={handleFilterChange}
-        onSearch={handleSubmit}
+        searchTerm={searchTerm}
+        lastSearchTerm={lastSearchTerm}
+        searchedSources={searchedSources}
       />
     </div>
   );

@@ -7,6 +7,7 @@
     - [X] Add Advanced Search
     - [ ] Add Searching Indicator
     - [ ] Fix Bugs
+    - [X] Add Docker
 # Backend
   - Loay:
     - [ ] Fix el badr's spyder

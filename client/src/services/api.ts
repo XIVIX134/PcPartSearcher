@@ -30,23 +30,42 @@ api.interceptors.response.use(
 interface SearchParams {
   searchTerm: string;
   sourceFilters: Record<string, boolean>;
+  isPartial?: boolean;
 }
 
-export const searchProducts = async ({ searchTerm, sourceFilters }: SearchParams): Promise<SearchResponse> => {
+export const searchProducts = async ({ searchTerm, sourceFilters, isPartial = false }: SearchParams): Promise<SearchResponse> => {
   try {
-    const response = await api.post('/search', { searchTerm, sourceFilters });
-    return response.data;
-  } catch (error: unknown) {
-    console.error('Search error:', error);
-    if (axios.isAxiosError(error)) {
-      if (error.response) {
-        // Server responded with error
-        throw new Error(error.response.data.message || 'Server error');
-      } else if (error.request) {
-        // Request made but no response
-        throw new Error('No response from server');
-      }
+    const response = await fetch('/api/search', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        search_term: searchTerm,
+        source_filters: sourceFilters,
+        is_partial: isPartial
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
+
+    const data = await response.json();
+
+    // Ensure all arrays exist even if empty
+    return {
+      olx: data.olx || [],
+      badr: data.badr || [],
+      sigma: data.sigma || [],
+      amazon: data.amazon || [],
+      alfrensia: data.alfrensia || [],
+      totalPages: data.total_pages || 1,
+      itemsPerPage: data.items_per_page || 24,
+      status: data.status || 'success'
+    };
+  } catch (error) {
+    console.error('Search API Error:', error);
     throw error;
   }
 };

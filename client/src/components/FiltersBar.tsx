@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { SourceFilters } from './SourceFilters';
 import { StockFilter } from './StockFilter';
 import { SortControls } from './SortControls';
@@ -11,12 +12,13 @@ interface FiltersBarProps {
   stockFilter: StockFilterType;
   sortOption: 'price-asc' | 'price-desc' | 'newest';
   view: 'grid' | 'list';
-  onSourceFilterChange: (source: SourceType) => void;
+  onSourceFilterChange: (filters: Record<SourceType, boolean>) => void; // Updated type
   onStockFilterChange: (value: StockFilterType) => void;
   onSortChange: (value: 'price-asc' | 'price-desc' | 'newest') => void;
   onViewChange: (view: 'grid' | 'list') => void;
   gridSize: number;
   onGridSizeChange: (size: number) => void;
+  searchedSources: Record<SourceType, boolean>;
 }
 
 export const FiltersBar = ({
@@ -31,16 +33,42 @@ export const FiltersBar = ({
   onViewChange,
   gridSize,
   onGridSizeChange,
+  searchedSources,
 }: FiltersBarProps) => {
-  const isMobile = window.innerWidth <= 768;
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Show sources filter if there are any searched sources (not just enabled ones)
+  const searchedSourcesList = Object.entries(searchedSources)
+    .filter(([, searched]) => searched)
+    .map(([source]) => source as SourceType);
 
   return (
     <div className={`filters-bar ${className}`}>
+      {searchedSourcesList.length > 1 && (  // Changed condition to use searchedSources
+        <div className="filter-section">
+          <h3>Sources</h3>
+          <SourceFilters 
+            filters={sourceFilters}
+            onFilterChange={(source: SourceType) => {
+              onSourceFilterChange({
+                ...sourceFilters,
+                [source]: !sourceFilters[source]
+              });
+            }}
+            availableSources={searchedSourcesList}  // Pass searched sources
+          />
+        </div>
+      )}
       <div className="filters-group">
-        <SourceFilters 
-          filters={sourceFilters}
-          onFilterChange={onSourceFilterChange}
-        />
         <StockFilter 
           value={stockFilter}
           onChange={onStockFilterChange}

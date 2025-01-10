@@ -20,6 +20,7 @@ from server.api.routes.sigma.sigma_route import sigma_bp
 from server.api.routes.general_search.search_route import search_bp
 from server.api.routes.badr.badr_route import badr_bp  
 from server.api.routes.amazon.amazon_route import amazon_bp  
+from server.api.routes.alfrensia.alfrensia_route import alfrensia_bp  # Add this line
 
 def get_allowed_origins():
     if app.debug:
@@ -59,6 +60,7 @@ app.register_blueprint(olx_bp, url_prefix='/api/olx')
 app.register_blueprint(sigma_bp, url_prefix='/api/sigma')
 app.register_blueprint(badr_bp, url_prefix='/api/badr')
 app.register_blueprint(amazon_bp, url_prefix='/api/amazon')
+app.register_blueprint(alfrensia_bp, url_prefix='/api/alfrensia')  # Add this line
 
 @app.route('/debug-routes', methods=['GET'])
 def list_routes():

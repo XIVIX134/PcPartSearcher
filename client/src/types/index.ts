@@ -16,13 +16,14 @@ export interface SearchResponse {
   olx: Product[];
   badr: Product[];
   sigma: Product[];
-  amazon: Product[]; // Add amazon array
+  amazon: Product[];
+  alfrensia: Product[];
   totalPages: number;
   itemsPerPage: number;
   status: string;
 }
 
-export type SourceType = 'olx' | 'badr' | 'sigma' | 'amazon';
+export type SourceType = 'olx' | 'badr' | 'sigma' | 'amazon' | 'alfrensia';
 
 export type SourceFilters = {
   [key in SourceType]: boolean;
@@ -33,4 +34,15 @@ export type StockFilter = 'all' | 'in-stock' | 'out-of-stock';
 export interface Filters {
   sources: SourceFilters;
   stock: StockFilter;
+}
+
+export interface SearchState {
+  currentTerm: string;
+  searchedSources: Record<SourceType, boolean>;
+  isPartialSearching: boolean;
+}
+
+export interface AdvancedSearchState {
+  tempFilters: SourceFilters;
+  pendingSources: SourceType[];
 }

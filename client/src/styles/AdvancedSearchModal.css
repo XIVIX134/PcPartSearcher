@@ -8,8 +8,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 9999; /* Increase z-index to be above all other elements */
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal-overlay.visible {
+  opacity: 1;
+  visibility: visible;
 }
 
 .modal-content {
@@ -21,29 +30,18 @@
   position: relative;
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transform: translateY(0); /* Ensure modal is not affected by page scroll */
+  margin: 2rem;
+  overflow-y: auto;
+  max-height: calc(100vh - 4rem); /* Add max height with padding */
+  opacity: 0;
+  transform: scale(0.95) translateY(20px);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.close-button {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: var(--text-color);
-  padding: 0.5rem;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: all 0.2s ease;
-}
-
-.close-button:hover {
-  background: rgba(255, 255, 255, 0.1);
+.modal-overlay.visible .modal-content {
+  opacity: 1;
+  transform: scale(1) translateY(0);
 }
 
 .modal-content h2 {

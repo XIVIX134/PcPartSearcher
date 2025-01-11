@@ -1,9 +1,7 @@
-# app/controllers/search_controller.py
 from fastapi import HTTPException
 from app.models.search_model import SearchModel
 from app.views.search_view import format_search_results
 from pydantic import BaseModel
-import asyncio
 
 class SearchRequest(BaseModel):
     search_term: str

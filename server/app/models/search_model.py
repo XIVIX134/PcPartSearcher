@@ -40,33 +40,33 @@ class SearchModel:
         results_list = await asyncio.gather(*tasks, return_exceptions=True)
 
         if source_filters.get('amazon'):
-            if isinstance(results_list[0], Exception):
+            if len(results_list) > 0 and isinstance(results_list[0], Exception):
                 results['amazon'] = [f"Error scraping Amazon: {str(results_list[0])}"]
-            else:
+            elif len(results_list) > 0:
                 results['amazon'] = results_list[0] or []
 
         if source_filters.get('olx'):
-            if isinstance(results_list[1], Exception):
+            if len(results_list) > 1 and isinstance(results_list[1], Exception):
                 results['olx'] = [f"Error scraping OLX: {str(results_list[1])}"]
-            else:
+            elif len(results_list) > 1:
                 results['olx'] = results_list[1] or []
 
         if source_filters.get('badr'):
-            if isinstance(results_list[2], Exception):
+            if len(results_list) > 2 and isinstance(results_list[2], Exception):
                 results['badr'] = [f"Error scraping Badr: {str(results_list[2])}"]
-            else:
+            elif len(results_list) > 2:
                 results['badr'] = results_list[2] or []
 
         if source_filters.get('sigma'):
-            if isinstance(results_list[3], Exception):
+            if len(results_list) > 3 and isinstance(results_list[3], Exception):
                 results['sigma'] = [f"Error scraping Sigma: {str(results_list[3])}"]
-            else:
+            elif len(results_list) > 3:
                 results['sigma'] = results_list[3] or []
 
         if source_filters.get('alfrensia'):
-            if isinstance(results_list[4], Exception):
+            if len(results_list) > 4 and isinstance(results_list[4], Exception):
                 results['alfrensia'] = [f"Error scraping ALFrensia: {str(results_list[4])}"]
-            else:
+            elif len(results_list) > 4:
                 results['alfrensia'] = results_list[4] or []
 
         return results

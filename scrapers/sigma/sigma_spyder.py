@@ -65,13 +65,21 @@ class SigmaSpyder:
                             stock_status = "Out of Stock"
             
             return {
-                "title": title,
-                "link": f"https://www.sigma-computer.com/{link}",
-                "image": f"https://www.sigma-computer.com/{image}",
-                "price_new": price_new,
-                "price_old": price_old,
-                "stock": stock_status,
-                "description": description
+                "Product ID": "", # TODO: Extract product ID from link
+                "Title": title,
+                "Price": price_new,
+                "Tax": "0 EGP",
+                "Location": "Sigma Computer",
+                "Details Link": f"https://www.sigma-computer.com/{link}",
+                "Image URL": f"https://www.sigma-computer.com/{image}",
+                # "price_old": price_old,
+                "Stock": stock_status,
+                "Brand": "",    # TODO: Extract brand from description
+                "Model": "",    # TODO: Extract model from description
+                "Labels": ["New", "Warranty", "B2C"],
+                "Rating": 5,
+                "Description": description,
+                "Page": 1
             }
         except Exception as e:
             print(f"Error parsing product: {e}")

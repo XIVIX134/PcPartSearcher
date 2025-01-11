@@ -1,15 +1,10 @@
 from fastapi import HTTPException
 from app.models.search_model import SearchModel
-from app.views.search_view import format_search_results
+from server.app.utils.search_utils import format_search_results
 from pydantic import BaseModel
 
-class SearchRequest(BaseModel):
-    search_term: str
-    source_filters: dict
 
-async def search_products(request: SearchRequest):
-    search_term = request.search_term
-    source_filters = request.source_filters
+async def search_controller(search_term, source_filters):
     
     try:
         model = SearchModel()
@@ -20,4 +15,4 @@ async def search_products(request: SearchRequest):
         return formatted_results
     
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"[ CONTROLL ] Search failed: {str(e)}")

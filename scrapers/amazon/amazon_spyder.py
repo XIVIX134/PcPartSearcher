@@ -62,11 +62,19 @@ class AmazonSpyder:
                         image = image_div.img["src"] if image_div and image_div.img else "N/A"
 
                         products.append({
-                            "title": title,
-                            "link": link,
-                            "price": price,
-                            "rating": rating,
-                            "image": image,
+                            "Product ID": "",
+                            "Title": title,
+                            "Price": price,
+                            "Tax": "0 EGP",
+                            "Location": "Amazon Egypt",
+                            "Details Link": link,
+                            "Image URL": image,
+                            "Stock": "In Stock",
+                            "Brand": "", # TODO: Extract brand
+                            "Model": "", # TODO: Extract model
+                            "Labels": ["NEW", "Warranty", "Delivery" "B2C"],
+                            "Rating": rating,
+                            "Description": "", # TODO: Extract description
                             "Page": page
                         })
                     except AttributeError:

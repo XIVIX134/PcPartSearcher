@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from app.controllers.search_controller import search_products
+from app.views.search_view import search_view
 
 search_bp = APIRouter()
 
-search_bp.post("/search")(search_products)
+search_bp.post("/search")(search_view)

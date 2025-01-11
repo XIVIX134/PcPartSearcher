@@ -46,13 +46,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               </span>
             </p>
             {product.source === 'sigma' && (
-              <span className={`stock-badge ${getStockClass(product.stock)}`}>
-                {getStockDisplay(product.stock)}
+              <span className={`stock-badge ${getStockClass(product.Stock)}`}>
+                {getStockDisplay(product.Stock)}
               </span>
             )}
-            {product.source === 'amazon' && product.rating && (
+            {product.source === 'amazon' && product.Rating && (
               <span className="rating-badge">
-                {product.rating}
+                {product.Rating}
               </span>
             )}
           </div>

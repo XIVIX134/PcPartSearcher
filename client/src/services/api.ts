@@ -35,7 +35,7 @@ interface SearchParams {
 
 export const searchProducts = async ({ searchTerm, sourceFilters, isPartial = false }: SearchParams): Promise<SearchResponse> => {
   try {
-    const response = await fetch('/api/search', {
+    const response = await fetch('http://localhost:5000/api/search', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

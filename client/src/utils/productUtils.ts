@@ -8,13 +8,14 @@ export const normalizeProduct = (product: Product, source: SourceType): Product 
     source,
     uid: generateUID(),
     'Product ID': product['Product ID'] || generateUID(),
-    'Price': normalizePrice(product.Price).toLocaleString('en-US') + ' EGP',
+    'Price': formatPrice(normalizePrice(product.Price)),
     stock: normalizeStockStatus(product.stock),
   };
 };
 
 // Convert price string to number for sorting/comparison
-export const normalizePrice = (price: string): number => {
+export const normalizePrice = (price?: string): number => {
+  if (!price) return 0;
   // Remove currency symbols, commas, and other non-numeric characters except decimal point
   const cleanPrice = price.replace(/[^0-9.]/g, '');
   const number = parseFloat(cleanPrice);

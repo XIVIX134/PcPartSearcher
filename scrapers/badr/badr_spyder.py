@@ -56,9 +56,6 @@ class BadrSpyder:
                     #       f.write(html)
 
                     list_of_products = soup.find('div', class_='main-products main-products-style product-grid ipr-grid')
-
-                    if not list_of_products:
-                        return json.dumps({"error": "No products found on the page"})
                     
                     product_divs = list_of_products.find_all('div', class_='product-layout')
                     

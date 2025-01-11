@@ -201,7 +201,7 @@ export const SearchPage: React.FC = () => {
     // Apply stock filter
     if (stockFilter !== 'all') {
       filteredProducts = filteredProducts.filter(product => {
-        const stockStatus = product.stock?.toLowerCase() || '';
+        const stockStatus = product.Stock?.toLowerCase() || '';
         
         if (stockFilter === 'in-stock') {
           // For Sigma products, check stock status

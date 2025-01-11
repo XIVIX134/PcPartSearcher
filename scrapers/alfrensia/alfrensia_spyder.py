@@ -67,11 +67,20 @@ class ALFrensia_Spyder:
                         price = price_elem.get_text(strip=True) if price_elem else "No Price"
 
                         products.append({
-                            "title": title,
-                            "url": url,
-                            "image_url": image_url,
-                            "price": price,
-                            "stock_status": stock_status,
+                            "Product ID": "", # TODO: Extact product ID
+                            "Title": title,
+                            "Price": price,
+                            "Tax": "0 EGP",
+                            "Location": "Alfrensia Store",
+                            "Details Link": url,
+                            "Image URL": image_url,
+                            "Stock": "In Stock", 
+                            "Brand": "", # TODO: Extact product Brand
+                            "Model": "", # TODO: Extact product Model
+                            "Labels": ["NEW", "Warranty", "B2C"],
+                            "Rating": 5,
+                            "Description": "", # TODO: Extact product Description
+                            "Page": 1
                         })
 
                     return products

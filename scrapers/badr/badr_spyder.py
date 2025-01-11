@@ -68,46 +68,54 @@ class BadrSpyder:
                             details = {}
 
                             # Product ID
-                            details['product_id'] = div.get('data-product-id', "N/A")
+                            details['Product ID'] = div.get('data-product-id', "N/A")
 
                             # Product name
                             name_tag = div.select_one('.name a')
-                            details['name'] = name_tag.text.strip() if name_tag else "N/A"
-
+                            details['Title'] = name_tag.text.strip() if name_tag else "N/A"
+                            
+                            # Product price (new)
+                            price_new_tag = div.select_one('.price .price-normal')
+                            details['Price'] = price_new_tag.text.strip() if price_new_tag else "N/A"
+                            
+                            # Tax price
+                            tax_price_tag = div.select_one('.price .price-tax')
+                            details['Tax_price'] = tax_price_tag.text.replace('Ex Tax:', '').strip() if tax_price_tag else "N/A"
+                            
+                            # Location
+                            details['Location'] = "El Badr Group"
+                            
                             # Product URL
-                            details['url'] = name_tag['href'] if name_tag and 'href' in name_tag.attrs else "N/A"
+                            details['Details Link'] = name_tag['href'] if name_tag and 'href' in name_tag.attrs else "N/A"
 
                             # Product image URL
                             img_tag = div.select_one('.product-img img')
-                            details['image_url'] = img_tag['src'] if img_tag else "N/A"
-
-                            # Description
-                            description_tag = div.select_one('.description')
-                            details['description'] = description_tag.text.strip() if description_tag else "N/A"
-
-                            # Product price (new)
-                            price_new_tag = div.select_one('.price .price-normal')
-                            details['price_new'] = price_new_tag.text.strip() if price_new_tag else "N/A"
-
-                            # Tax price
-                            tax_price_tag = div.select_one('.price .price-tax')
-                            details['tax_price'] = tax_price_tag.text.replace('Ex Tax:', '').strip() if tax_price_tag else "N/A"
+                            details['Image URL'] = img_tag['src'] if img_tag else "N/A"
+                            
+                            #stock status
+                            details['Stock'] = "In Stock"
 
                             # Brand
                             brand_tag = div.select_one('.stat-1 a')
-                            details['brand'] = brand_tag.text.strip() if brand_tag else "N/A"
+                            details['Brand'] = brand_tag.text.strip() if brand_tag else "N/A"
 
                             # Model
                             model_tag = div.select_one('.stat-2 span:nth-child(2)')
-                            details['model'] = model_tag.text.strip() if model_tag else "N/A"
+                            details['Model'] = model_tag.text.strip() if model_tag else "N/A"
 
                             # Labels (e.g., New, Discount)
                             labels = div.select('.product-labels span')
-                            details['labels'] = [label.text.strip() for label in labels] if labels else []
+                            details['Labels'] = [label.text.strip() for label in labels] if labels else []
 
                             # Product rating (stars)
                             rating_stars = div.select('.rating-stars .fa-star')
-                            details['rating'] = len(rating_stars)
+                            details['Rating'] = len(rating_stars)
+                            
+                            # Description
+                            description_tag = div.select_one('.description')
+                            details['Description'] = description_tag.text.strip() if description_tag else "N/A"
+                            
+                            details['Page'] = 1
 
                             products.append(details)
                         except Exception as e:

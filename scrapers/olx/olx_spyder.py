@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 import re
 import logging
 from typing import List, Optional, Dict, Any
-
+import json
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -65,9 +65,16 @@ class OLX_Spyder:
                         "Product ID": product_id,
                         "Title": title_tag.text.strip() if title_tag else "N/A",
                         "Price": price_tag.text.strip() if price_tag else "N/A",
+                        "Tax": "0 EGP",
                         "Location": location_tag.text.strip() if location_tag else "N/A",
-                        "Image URL": image_tag['src'] if image_tag else "N/A",
                         "Details Link": details_link,
+                        "Image URL": image_tag['src'] if image_tag else "N/A",
+                        "Stock": "Contact Owner", 
+                        "Brand": "N/A",
+                        "Model": "N/A",
+                        "Labels": ["Used", "No Warranty", "C2C"],
+                        "Rating": 5,
+                        "Description": title_tag.text.strip() if title_tag else "N/A",
                         "Page": page
                     })
 
@@ -130,11 +137,11 @@ class OLX_Spyder:
         return await self.scrape_olx_async()
 
 # Example Usage
-# async def main():
-#     spyder = OLX_Spyder("laptop")
-#     results = await spyder.scrape()
-#     with open('olx_products.json', 'w') as f:
-#       f.write(json.dumps(results, indent=2))
+async def main():
+    spyder = OLX_Spyder("rtx")
+    results = await spyder.scrape()
+    with open('olx_products.json', 'w') as f:
+      f.write(json.dumps(results, indent=2))
 
-# if __name__ == "__main__":
-#     asyncio.run(main()) 
+if __name__ == "__main__":
+    asyncio.run(main()) 

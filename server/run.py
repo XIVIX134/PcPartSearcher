@@ -1,7 +1,6 @@
 import os
 import sys
 
-# Add the parent directory to sys.path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
 if current_dir not in sys.path:

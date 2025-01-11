@@ -1,3 +1,4 @@
+import json
 import aiohttp
 import asyncio
 from bs4 import BeautifulSoup
@@ -28,13 +29,14 @@ class AmazonSpyder:
         """Fetches and parses a single page"""
         try:
             url = f"https://www.amazon.eg/s?k={search_term}&language=en&page={page}"
+            logger.info(f"[ Amazon.eg Spider ] Requesting page {page} with term {search_term} from URL: {url}")
             async with session.get(url, headers=self.headers) as response:
                 if response.status == 404:
-                    logger.info(f"Page {page} not found (404)")
+                    logger.info(f"[ Amazon.eg Spider ] Page {page} not found (404)")
                     return None
                 
                 if response.status != 200:
-                    logger.error(f"Failed to fetch page {page}. Status: {response.status}")
+                    logger.error(f"[ Amazon.eg Spider ] Failed to fetch page {page}. Status: {response.status}")
                     return []
                 
                 html = await response.text()
@@ -70,11 +72,11 @@ class AmazonSpyder:
                     except AttributeError:
                         continue
 
-                logger.info(f"Found {len(products)} listings on page {page}")
+                logger.info(f"[ Amazon.eg Spider ] Found {len(products)} listings on page {page}")
                 return products
                 
         except Exception as e:
-            logger.error(f"Error fetching page {page}: {str(e)}")
+            logger.error(f"[ Amazon.eg Spider ] Error fetching page {page}: {str(e)}")
             return []
 
     async def search_products_async(self, search_term: str) -> List[Dict[str, Any]]:
@@ -84,7 +86,6 @@ class AmazonSpyder:
 
         timeout = aiohttp.ClientTimeout(total=30)
         async with aiohttp.ClientSession(timeout=timeout) as session:
-            # First get page 1 to check if search has results
             first_page = await self.fetch_page(session, search_term, 1)
             if not first_page:
                 return []
@@ -93,21 +94,18 @@ class AmazonSpyder:
             current_page = 2
             
             while True:
-                # Create batch of concurrent requests
                 batch_tasks = []
                 for i in range(BATCH_SIZE):
                     page_num = current_page + i
                     batch_tasks.append(self.fetch_page(session, search_term, page_num))
                 
-                # Execute batch concurrently
                 batch_results = await asyncio.gather(*batch_tasks)
                 
-                # Process results and check for end of pages
                 found_404 = False
                 new_results = []
                 
                 for result in batch_results:
-                    if result is None:  # 404 encountered
+                    if result is None:
                         found_404 = True
                         break
                     if result:
@@ -119,18 +117,28 @@ class AmazonSpyder:
                     break
                     
                 current_page += BATCH_SIZE
-                if current_page > 20:  # Safety limit
+                if current_page > 20:
                     break
             
             return all_results
 
     def scrap(self, search_term: str, page: int = 1) -> List[Dict[str, Any]]:
         """Synchronous wrapper for async scraping"""
-        results = asyncio.run(self.search_products_async(search_term))
+        results = asyncio.get_event_loop().run_until_complete(self.search_products_async(search_term))
         
         # Sort results by page
         results.sort(key=lambda x: x.get('Page', 1))
         if page > 1:
             return [r for r in results if r.get('Page') == page]
         return results
+    
+# Example usage:
+# async def main():
+#     amazon_spyder = AmazonSpyder()
+#     results = await amazon_spyder.search_products_async("rtx")
+#     with open('amazon_results.json', 'w') as f:
+#         f.write(json.dumps(results, indent=2))
+#
+# if __name__ == '__main__':
+#     asyncio.run(main())
 

@@ -2,10 +2,13 @@ import aiohttp
 import asyncio
 from bs4 import BeautifulSoup
 import json
+import logging
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class BadrSpyder:
-    def _init_(self, save_html=False):
+    def __init__(self):
         """
         Initialize the BadrSpyder class.
         
@@ -25,7 +28,6 @@ class BadrSpyder:
             "Sec-Fetch-Site": "none",
             "Sec-Fetch-User": "?1",
         }
-        self.save_html = save_html
 
     async def scrap(self, search_term: str) -> str:
         """
@@ -40,17 +42,18 @@ class BadrSpyder:
         url = f"{self.base_url}{search_term}"
         async with aiohttp.ClientSession(headers=self.headers) as session:
             try:
+                logger.info(f"[ ElBadr Spider ] Fetching El Badr Group data from URL: {url}")
                 async with session.get(url) as response:
                     if response.status != 200:
+                        logger.error(f"[ ElBadr Spider ] Failed to fetch data. HTTP Status Code: {response.status}")
                         return json.dumps({"error": f"Failed to fetch data. HTTP Status Code: {response.status}"})
                     
                     html = await response.text()
                     soup = BeautifulSoup(html, 'html.parser')
 
-                    # Save HTML for debugging if enabled
-                    # if self.save_html:
-                    #     with open("badr_results.html", 'w', encoding='utf-8') as f:
-                    #         f.write(html)
+
+                    #   with open("badr_results.html", 'w', encoding='utf-8') as f:
+                    #       f.write(html)
 
                     list_of_products = soup.find('div', class_='main-products main-products-style product-grid ipr-grid')
 
@@ -58,6 +61,8 @@ class BadrSpyder:
                         return json.dumps({"error": "No products found on the page"})
                     
                     product_divs = list_of_products.find_all('div', class_='product-layout')
+                    
+                    logger.info(f"[ ElBadr Spider ] Found {len(product_divs)} products on the page")
 
                     products = []   
 
@@ -116,15 +121,14 @@ class BadrSpyder:
             except Exception as e:
                 return e
 
+
 # Example usage
 # async def main():
-#     spyder = BadrSpyder(save_html=True)
-#     search_results = await spyder.scrap("rtx")
-    
-#     with open("badr.json", 'w', encoding='utf-8') as f:
+#     spyder = BadrSpyder()
+#     search_results = await spyder.scrap("hp")
+#     with open("badr_results.json", 'w', encoding='utf-8') as f:
 #         json.dump(search_results, f, indent=4)
-    
+
 #     print("Data successfully written to badr.json")
 
-# if _name_ == "_main_":
-#     asyncio.run(main())
+# asyncio.run(main())

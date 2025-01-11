@@ -3,6 +3,10 @@ import asyncio
 from bs4 import BeautifulSoup
 import json
 from urllib.parse import urlparse, unquote
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class ALFrensia_Spyder:
     def __init__(self):
@@ -29,9 +33,10 @@ class ALFrensia_Spyder:
 
         async with aiohttp.ClientSession(headers=self.headers) as session:
             try:
+                logger.info(f"[ ALFrensia Spider ] Fetching ALFrensia data from URL: {url}")
                 async with session.get(url) as response:
                     if response.status != 200:
-                        print(f"Failed to fetch URL: {url}")
+                        logger.error(f"[ ALFrensia Spider ] Failed to fetch data from {url}. HTTP Status Code: {response.status}")
                         return []
 
                     html = await response.text()
@@ -39,11 +44,13 @@ class ALFrensia_Spyder:
 
                     product_container = soup.find("div", class_="col large-9")
                     if not product_container:
-                        print("No product container found.")
+                        logger.error("No products found.")
                         return []
 
                     products = []
                     product_cards = product_container.find_all("div", class_="product-small")
+                    
+                    logger.info(f"[ ALFrensia Spider ] Found {len(product_cards)} products")
 
                     for card in product_cards:
                         title_elem = card.find("a", class_="woocommerce-LoopProduct-link")
@@ -74,12 +81,12 @@ class ALFrensia_Spyder:
                 return []
 
 
-async def main():
-    spider = ALFrensia_Spyder()
-    search_term = "rtx"
-    products = await spider.scrap(search_term)
-    with open('alfrensia_products.json', 'w') as f:
-        f.write(json.dumps(products, indent=2))
+# async def main():
+#     spider = ALFrensia_Spyder()
+#     search_term = "rtx"
+#     products = await spider.scrap(search_term)
+#     with open('alfrensia_results.json', 'w') as f:
+#         f.write(json.dumps(products, indent=2))
 
 
-asyncio.run(main())
+# asyncio.run(main())

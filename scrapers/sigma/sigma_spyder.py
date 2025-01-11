@@ -1,6 +1,20 @@
-import requests
+import asyncio
+import aiohttp
 from bs4 import BeautifulSoup
 import re
+
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/109.0",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.5",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Connection": "keep-alive",
+    "Upgrade-Insecure-Requests": "1",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
+}
 
 class SigmaSpyder:
     def __init__(self, search_term):
@@ -16,12 +30,12 @@ class SigmaSpyder:
     def sanitize_filename(search_term):
         return re.sub(r'[^\w\-]', '_', search_term)
 
-    def fetch_data(self):
-        response = requests.get(self.base_url, params=self.params)
-        if response.status_code != 200:
-            print(f"Failed to fetch data: {response.status_code}")
-            return None
-        return response.content
+    async def fetch_data(self, session):
+        async with session.get(self.base_url, params=self.params) as response:
+            if response.status != 200:
+                print(f"Failed to fetch data: {response.status}")
+                return None
+            return await response.text()
 
     def parse_product(self, product):
         try:
@@ -63,23 +77,28 @@ class SigmaSpyder:
             print(f"Error parsing product: {e}")
             return None
 
-    def scrape(self):
-        content = self.fetch_data()
-        if not content:
-            return None
-        
-        soup = BeautifulSoup(content, "html.parser")
-        product_blocks = soup.find_all("div", class_="product-layout")
-        
-        results = []
-        for product in product_blocks:
-            product_data = self.parse_product(product)
-            if product_data:
-                results.append(product_data)
+    async def scrape(self):
+        async with aiohttp.ClientSession(headers=HEADERS) as session:
+            content = await self.fetch_data(session)
+            if not content:
+                return None
+            
+            soup = BeautifulSoup(content, "html.parser")
+            product_blocks = soup.find_all("div", class_="product-layout")
+            
+            results = []
+            for product in product_blocks:
+                product_data = self.parse_product(product)
+                if product_data:
+                    results.append(product_data)
         
         return results
 
-# Example usage:
-# spyder = SigmaSpyder("laptop")
-# results = spyder.scrape()
-# print(results)
+# # Example usage in an async function:
+# async def main():
+#     spyder = SigmaSpyder("laptop")
+#     results = await spyder.scrape()
+#     with open('sigma_results.json', 'w') as f:
+#       f.write(json.dumps(results, indent=2))
+
+# asyncio.run(main())

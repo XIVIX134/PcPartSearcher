@@ -4,9 +4,11 @@ import os
 import sys
 import logging
 import traceback
+import asyncio
 from scrapers.olx.olx_spyder import OLX_Spyder
 from scrapers.sigma.sigma_spyder import SigmaSpyder
 from scrapers.amazon.amazon_spyder import AmazonSpyder  # Add this import
+from scrapers.alfrensia.alfrensia_spyder import ALFrensia_Spyder  # Add this import
 
 # Configure logging with more details
 logging.basicConfig(
@@ -18,7 +20,6 @@ logger = logging.getLogger(__name__)
 # Get the absolute path to the project root
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../'))
 sys.path.insert(0, project_root)
-
 @cross_origin()
 def search_products():
     try:
@@ -56,6 +57,7 @@ def search_products():
             'badr': [],
             'sigma': [],
             'amazon': [],
+            'alfrensia': []
         }
 
         # Only scrape enabled sources
@@ -97,6 +99,24 @@ def search_products():
                     'stock': 'In Stock'  # Amazon typically only shows in-stock items
                 })
             results['amazon'] = transformed_amazon
+        
+        # Add Alfrensia source
+        if source_filters.get('alfrensia'):
+            alfrensia_spyder = ALFrensia_Spyder()  # This is the correct class name
+            alfrensia_raw_results = asyncio.run(alfrensia_spyder.scrap(search_term))  # Use asyncio.run
+            transformed_alfrensia = []
+            for item in alfrensia_raw_results or []:
+                transformed_alfrensia.append({
+                    'Product ID': hash(item['url'])[:8],
+                    'Title': item['title'],
+                    'Price': item['price'],
+                    'Location': 'Alfrensia',
+                    'Image URL': item['image_url'],
+                    'Details Link': item['url'],
+                    'Description': '',
+                    'stock': item['stock_status']
+                })
+            results['alfrensia'] = transformed_alfrensia
 
         ######## Return response ########
         

@@ -13,6 +13,10 @@ services:
       - server
     networks:
       - app-network
+    extra_hosts:
+      - "server:host-gateway"
+    dns:
+      - 8.8.8.8
 
   server:
     build:
@@ -27,7 +31,11 @@ services:
       - FLASK_APP=run.py
     networks:
       - app-network
+    container_name: server
 
 networks:
   app-network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

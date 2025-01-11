@@ -12,18 +12,20 @@ export default defineConfig({
       '@services': path.resolve(__dirname, './src/services'),
       '@types': path.resolve(__dirname, './src/types'),
       '@styles': path.resolve(__dirname, './src/styles'),
-      '@utils': path.resolve(__dirname, './src/utils'),  // Add this line
+      '@utils': path.resolve(__dirname, './src/utils'),
     }
   },
   server: {
+    host: true,
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://server:5000',  // Update to use Docker service name
+        target: 'http://localhost:5000',
         changeOrigin: true,
         secure: false,
+        ws: true,
         rewrite: (path) => path.replace(/^\/api/, '/api'),
-        configure: (proxy) => {
+        configure: (proxy, _options) => {
           proxy.on('error', (err, _req, res) => {
             console.error('Proxy error:', err);
             if (!res.writableEnded) {
@@ -33,7 +35,13 @@ export default defineConfig({
               res.end(JSON.stringify({ error: 'Proxy Error', message: err.message }));
             }
           });
-        }
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            console.log('Sending Request to the Target:', req.method, req.url);
+          });
+          proxy.on('proxyRes', (proxyRes, req, _res) => {
+            console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
+          });
+        },
       }
     }
   },

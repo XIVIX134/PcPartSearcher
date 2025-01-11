@@ -19,7 +19,6 @@ if project_root not in sys.path:
 from api.routes.olx.olx_route import olx_bp
 from api.routes.sigma.sigma_route import sigma_bp
 from api.routes.general_search.search_route import search_bp
-from api.routes.badr.badr_route import badr_bp  
 from api.routes.amazon.amazon_route import amazon_bp  
 from api.routes.alfrensia.alfrensia_route import alfrensia_bp
 
@@ -59,7 +58,6 @@ logger.debug("Registering blueprints...")
 app.register_blueprint(search_bp, url_prefix='/api')
 app.register_blueprint(olx_bp, url_prefix='/api/olx')
 app.register_blueprint(sigma_bp, url_prefix='/api/sigma')
-app.register_blueprint(badr_bp, url_prefix='/api/badr')
 app.register_blueprint(amazon_bp, url_prefix='/api/amazon')
 app.register_blueprint(alfrensia_bp, url_prefix='/api/alfrensia')  # Add this line
 

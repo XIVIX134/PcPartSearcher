@@ -5,8 +5,8 @@ setup(
     version="0.1",
     packages=find_packages(),
     install_requires=[
-        'flask',
-        'flask-cors',
+        'fastapi',
+        'uvicorn',
         'requests',
         'beautifulsoup4',
         'aiohttp'

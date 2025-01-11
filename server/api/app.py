@@ -15,12 +15,13 @@ project_root = os.path.dirname(os.path.dirname(current_dir))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from server.api.routes.olx.olx_route import olx_bp
-from server.api.routes.sigma.sigma_route import sigma_bp
-from server.api.routes.general_search.search_route import search_bp
-from server.api.routes.badr.badr_route import badr_bp  
-from server.api.routes.amazon.amazon_route import amazon_bp  
-from server.api.routes.alfrensia.alfrensia_route import alfrensia_bp  # Add this line
+# Update imports to remove 'server.' prefix
+from api.routes.olx.olx_route import olx_bp
+from api.routes.sigma.sigma_route import sigma_bp
+from api.routes.general_search.search_route import search_bp
+from api.routes.badr.badr_route import badr_bp  
+from api.routes.amazon.amazon_route import amazon_bp  
+from api.routes.alfrensia.alfrensia_route import alfrensia_bp
 
 def get_allowed_origins():
     if app.debug:

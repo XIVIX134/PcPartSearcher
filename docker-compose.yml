@@ -3,6 +3,8 @@ services:
     build: 
       context: ./client
       dockerfile: Dockerfile
+      args:
+        - NODE_ENV=production
     ports:
       - "5173:5173"
     environment:
@@ -16,6 +18,8 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile
+      args:
+        - FLASK_ENV=production
     ports:
       - "5000:5000"
     environment:

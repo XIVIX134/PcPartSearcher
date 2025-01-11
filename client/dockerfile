@@ -1,12 +1,13 @@
-FROM node:20-alpine
+# Build stage
+FROM node:20-slim AS builder
 
 WORKDIR /app
 
-# Copy package files
+# Copy only package files first for better caching
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm ci
 
 # Copy source code
 COPY . .
@@ -14,7 +15,18 @@ COPY . .
 # Build the app
 RUN npm run build
 
-# Expose port
+# Production stage
+FROM node:20-slim AS production
+
+WORKDIR /app
+
+# Copy only necessary files from builder
+COPY --from=builder /app/dist ./dist
+COPY package*.json ./
+
+# Install only production dependencies
+RUN npm ci --only=production
+
 EXPOSE 5173
 
 # Start the app

@@ -16,11 +16,10 @@ export default defineConfig({
     }
   },
   server: {
-    host: true,
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://server:5000',
+        target: 'http://server:5000',  // Update to use Docker service name
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, '/api'),

@@ -8,6 +8,11 @@
     - [ ] Add Searching Indicator
     - [ ] Fix Bugs
     - [X] Add Docker
+    - [ ] Add Accounts Frontend
+    - [ ] Fix Mobile Layout
+    - [ ] Improve Mobile performance
+    - [ ] Add PcPartPicker to the frontend
+    - [ ] Add wishlists to the frontend
 # Backend
   - Loay:
     - [ ] Fix el badr's spyder
@@ -20,3 +25,6 @@
     - [ ] Add support for Hankerz (https://www.hankerz.com.eg/)
     - [ ] Add support for Noon (https://www.noon.com/egypt-ar/)
     - [ ] Add support for El Nour Tech (https://elnour-tech.com/)
+    - [ ] Add Accounts Backend
+    - [ ] Add PcPartPicker API to the Backend
+    - [ ] Add database for users

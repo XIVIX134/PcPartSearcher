@@ -7,7 +7,7 @@
     - [X] Add Advanced Search
     - [ ] Add Searching Indicator
     - [ ] Fix Bugs
-    - [X] Add Docker
+    - [ ] Add Docker
     - [ ] Add Accounts Frontend
     - [ ] Fix Mobile Layout
     - [ ] Improve Mobile performance

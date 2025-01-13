@@ -10,10 +10,14 @@ import threading
 from collections import deque
 from datetime import datetime
 import re
+from colorama import init, Fore, Back, Style
 
 
 class Run_All:
     def __init__(self):
+        # Initialize colorama for Windows support
+        init(autoreset=True)
+        
         backend_process = None
         frontend_process = None
         
@@ -26,12 +30,12 @@ class Run_All:
             npm_path, node_path = self.check_prerequisites()
             
             self.print_separator()
-            print("Starting backend server...")
+            self.print_status("Starting backend server...", "info")
             backend_process = self.run_backend()
             time.sleep(2)
 
             self.print_separator()
-            print("Starting frontend server...")
+            self.print_status("Starting frontend server...", "info")
             mode = []
             if args.prod:
                 mode.append("Production")
@@ -40,7 +44,7 @@ class Run_All:
             if args.host:
                 mode.append("Hosted")
                 
-            print(f"Frontend Mode: {' + '.join(mode)}")
+            self.print_status(f"Frontend Mode: {' + '.join(mode)}", "info")
             
             frontend_process = self.run_frontend(npm_path, node_path, use_host=args.host, prod=args.prod)
             time.sleep(2)
@@ -56,21 +60,21 @@ class Run_All:
             try:
                 while True:
                     if backend_process.poll() is not None:
-                        print("Backend process exited")
+                        self.print_status("Backend process exited", "error")
                     if frontend_process.poll() is not None:
-                        print("Frontend process exited")
-                        print("Attempting to restart frontend...")
+                        self.print_status("Frontend process exited", "error")
+                        self.print_status("Attempting to restart frontend...", "warning")
                         frontend_process = self.run_frontend(npm_path, node_path, use_host=args.host, prod=args.prod)
                         frontend_thread = Thread(target=self.monitor_output, args=(frontend_process, "Frontend"), daemon=True)
                         frontend_thread.start()
                     time.sleep(1)
             except KeyboardInterrupt:
-                print("\nReceived shutdown signal...")
+                self.print_status("\nReceived shutdown signal...", "info")
 
         except KeyboardInterrupt:
-            print("\nReceived shutdown signal...")
+            self.print_status("\nReceived shutdown signal...", "info")
         except Exception as e:
-            print(f"An error occurred: {e}")
+            self.print_status(f"An error occurred: {e}", "error")
         finally:
             self.cleanup(backend_process, frontend_process)
             input("Press Enter to exit...")
@@ -135,15 +139,15 @@ class Run_All:
 
     def check_prerequisites(self):
         """Check if all required tools are installed"""
-        print("Checking prerequisites...")
+        self.print_status("Checking prerequisites...", "info")
         try:
             npm_path = self.find_npm()
             node_path = self.find_node()
-            print(f"Found npm at: {npm_path}")
-            print(f"Found node at: {node_path}")
+            self.print_status(f"Found npm at: {npm_path}", "success")
+            self.print_status(f"Found node at: {node_path}", "success")
             client_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'client')
             if not os.path.exists(os.path.join(client_dir, 'node_modules', 'vite')):
-                print("Installing Vite locally...")
+                self.print_status("Installing Vite locally...", "info")
                 subprocess.run(
                     [npm_path, 'install', '--save-dev', 'vite'],
                     cwd=client_dir,
@@ -151,9 +155,9 @@ class Run_All:
                     capture_output=True,
                     text=True
                 )
-                print("Vite installed successfully")
+                self.print_status("Vite installed successfully", "success")
             if not os.path.exists(os.path.join(client_dir, 'node_modules')):
-                print("Installing frontend dependencies...")
+                self.print_status("Installing frontend dependencies...", "info")
                 subprocess.run(
                     [npm_path, 'install'],
                     cwd=client_dir,
@@ -161,9 +165,9 @@ class Run_All:
                     capture_output=True,
                     text=True
                 )
-                print("Frontend dependencies installed successfully")
+                self.print_status("Frontend dependencies installed successfully", "success")
         except Exception as e:
-            print(f"Error during setup: {e}")
+            self.print_status(f"Error during setup: {e}", "error")
             sys.exit(1)
         return npm_path, node_path
 
@@ -227,7 +231,7 @@ class Run_All:
                     }
                 )
         except Exception as e:
-            print(f"Error starting frontend: {e}")
+            self.print_status(f"Error starting frontend: {e}", "error")
             raise
 
     @staticmethod
@@ -240,19 +244,185 @@ class Run_All:
             text = text.replace(old, new)
         return text
 
-    @staticmethod
-    def print_separator():
-        print("\n" + "=" * 50 + "\n")
+    def format_log_message(self, message):
+        """Format and colorize log messages based on type and content"""
+        
+        # Handle uvicorn/fastapi specific messages
+        if 'INFO:' in message:
+            if 'Uvicorn' in message:
+                return f"{Fore.GREEN}✓ INFO: Server started at {message.split('on')[1].strip()}{Style.RESET_ALL}"
+            elif 'Application startup' in message:
+                return f"{Fore.GREEN}✓ INFO: {message.split('INFO:')[1].strip()}{Style.RESET_ALL}"
+            elif 'Watching for file changes' in message:
+                return f"{Fore.GREEN}✓ INFO: {message.split('INFO:')[1].strip()}{Style.RESET_ALL}"
+            elif 'Started server process' in message:
+                pid = message.split('[')[1].split(']')[0]
+                return f"{Fore.GREEN}✓ INFO: Server process initialized [{pid}]{Style.RESET_ALL}"
+            elif 'Started reloader process' in message:
+                pid = message.split('[')[1].split(']')[0]
+                return f"{Fore.GREEN}✓ INFO: Started auto-reload service [{pid}]{Style.RESET_ALL}"
+            else:
+                return f"{Fore.GREEN}✓ INFO: {message.split('INFO:')[1].strip()}{Style.RESET_ALL}"
+
+        # For scraper messages
+        if any(spider in message for spider in ['Amazon.eg', 'ElBadr', 'ALFrensia', 'OLX']):
+            return self.format_scraper_message(message)
+
+        # Translate technical messages to human-readable format
+        translations = {
+            'Will watch for changes in these directories': 'Watching for file changes in',
+            'Started reloader process': 'Started auto-reload service',
+            'Started server process': 'Server process initialized',
+            'Waiting for application startup': 'Initializing application',
+            'Application startup complete': 'Server ready',
+            'Found': 'Successfully found',
+            'Requesting page': 'Searching page',
+            'Failed to fetch': 'Failed to access',
+            'not found': 'reached end of results',
+        }
+
+        # Apply translations
+        for tech, human in translations.items():
+            if tech in message:
+                message = message.replace(tech, human)
+
+        # Add icons for different message types
+        icons = {
+            'INFO': '✓',
+            'ERROR': '✗',
+            'WARNING': '⚠',
+            'DEBUG': 'ℹ',
+        }
+
+        # Color mappings
+        colors = {
+            'INFO': f"{Fore.GREEN}",
+            'ERROR': f"{Fore.RED}",
+            'WARNING': f"{Fore.YELLOW}",
+            'DEBUG': f"{Fore.CYAN}",
+        }
+
+        # Add progress indicators for spider messages
+        if 'Spider' in message:
+            if 'Searching page' in message:
+                message = f"🔍 {message}"
+            elif 'Successfully found' in message:
+                message = f"📦 {message}"
+            elif 'Failed' in message:
+                message = f"❌ {message}"
+
+        # Colorize log levels with icons
+        for level, color in colors.items():
+            if level in message:
+                icon = icons.get(level, '')
+                message = message.replace(level, f"{color}{icon} {level}{Style.RESET_ALL}")
+
+        # Format spider names
+        spiders = {
+            'Amazon.eg': f"{Fore.YELLOW}Amazon.eg{Style.RESET_ALL}",
+            'ElBadr': f"{Fore.BLUE}ElBadr{Style.RESET_ALL}",
+            'ALFrensia': f"{Fore.MAGENTA}ALFrensia{Style.RESET_ALL}",
+            'OLX': f"{Fore.CYAN}OLX{Style.RESET_ALL}"
+        }
+        
+        for spider, colored in spiders.items():
+            if spider in message:
+                message = message.replace(f"[{spider}", f"[{colored}")
+
+        # Format HTTP responses
+        if 'HTTP' in message:
+            status_match = re.search(r'(\d{3}) (OK|ERROR)', message)
+            if status_match:
+                code, status = status_match.groups()
+                if code.startswith('2'):
+                    message = f"✓ API Request successful ({Fore.GREEN}{code}{Style.RESET_ALL})"
+                elif code.startswith('4'):
+                    message = f"⚠ API Request failed ({Fore.YELLOW}{code}{Style.RESET_ALL})"
+                elif code.startswith('5'):
+                    message = f"✗ Server error ({Fore.RED}{code}{Style.RESET_ALL})"
+
+        # Highlight URLs
+        urls = re.findall(r'(https?://\S+)', message)
+        for url in urls:
+            message = message.replace(url, f"{Fore.CYAN}{url}{Style.RESET_ALL}")
+
+        return message
+
+    def format_scraper_message(self, message):
+        """Special formatting for scraper messages"""
+        # Spider name formatting
+        spiders = {
+            'Amazon.eg': (Fore.YELLOW, '🛒'),
+            'ElBadr': (Fore.BLUE, '🏪'),
+            'ALFrensia': (Fore.MAGENTA, '🏬'),
+            'OLX': (Fore.CYAN, '📦')
+        }
+        
+        formatted = message
+
+        # Extract spider name
+        spider_name = next((name for name in spiders.keys() if name in message), None)
+        if spider_name:
+            color, icon = spiders[spider_name]
+            # Clean up the message format
+            formatted = formatted.replace(f"INFO:scrapers.{spider_name.lower()}.{spider_name.lower()}_spyder:", '')
+            formatted = formatted.replace(f"ERROR:scrapers.{spider_name.lower()}.{spider_name.lower()}_spyder:", '')
+            formatted = formatted.replace(f"[ {spider_name} Spider ]", f"{icon} {color}{spider_name}{Style.RESET_ALL}")
+
+        # Format different message types
+        if "Searching page" in formatted:
+            formatted = formatted.replace("Searching page", f"{Fore.CYAN}Scanning page{Style.RESET_ALL}")
+            formatted = re.sub(r'(page \d+)', f"{Fore.WHITE}\\1{Style.RESET_ALL}", formatted)
+        elif "Successfully found" in formatted:
+            match = re.search(r'Successfully found (\d+)', formatted)
+            if match:
+                count = match.group(1)
+                formatted = f"Found {Fore.GREEN}{count}{Style.RESET_ALL} items"
+        elif "Failed to access" in formatted:
+            formatted = formatted.replace("Failed to access", f"{Fore.RED}Failed{Style.RESET_ALL}")
+            if "503" in formatted:
+                formatted += f" ({Fore.RED}server error{Style.RESET_ALL})"
+        elif "reached end of results" in formatted:
+            page = re.search(r'Page (\d+)', formatted)
+            if page:
+                formatted = f"{Fore.YELLOW}Reached last page ({page.group(1)}){Style.RESET_ALL}"
+
+        # Clean up URLs
+        urls = re.findall(r'(https?://\S+)', formatted)
+        for url in urls:
+            short_url = re.sub(r'https?://(www\.)?', '', url)
+            short_url = re.sub(r'\?.+$', '', short_url)
+            formatted = formatted.replace(url, f"{Fore.CYAN}{short_url}{Style.RESET_ALL}")
+
+        return formatted.strip()
+
+    def format_output(self, prefix, line, is_error=False):
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        prefix_color = Fore.RED if is_error else (Fore.BLUE if prefix == "Backend" else Fore.GREEN)
+        
+        # Add service icons
+        service_icon = "🖥️ " if prefix == "Backend" else "🌐 "
+        
+        formatted = f"{Fore.WHITE}[{timestamp}]{Style.RESET_ALL} {service_icon}[{prefix_color}{prefix}{Style.RESET_ALL}] "
+        formatted += self.format_log_message(line)
+        return formatted
+
+    def print_separator(self):
+        print(f"\n{Fore.BLUE}{'='*50}{Style.RESET_ALL}\n")
+
+    def print_status(self, message, status="info"):
+        colors = {
+            "info": Fore.BLUE,
+            "success": Fore.GREEN,
+            "error": Fore.RED,
+            "warning": Fore.YELLOW
+        }
+        color = colors.get(status, Fore.WHITE)
+        print(f"{color}➜ {message}{Style.RESET_ALL}")
 
     def monitor_output(self, process, prefix):
-        
-        
         output_buffer = deque(maxlen=100)
         buffer_lock = threading.Lock()
-        
-        def format_output(prefix, line, is_error=False):
-            timestamp = datetime.now().strftime("%H:%M:%S")
-            return f"[{timestamp}][{prefix}] {line}"
         
         def read_stream(stream, is_error=False):
             while True:
@@ -261,23 +431,23 @@ class Run_All:
                     break
                 line = self.clean_output(line.strip())
                 if line:
-                    # Detect and highlight port/IP information
-                    if prefix == "Frontend" and ("localhost:" in line or "Network: " in line):
-                        # Extract and format network information
+                    # Special handling for server URLs
+                    if "Local:" in line or "Network:" in line:
                         if "Local:" in line:
                             local_match = re.search(r'(https?://\S+)', line)
                             if local_match:
-                                print(f"\n➜ Local URL: {local_match.group(1)}")
+                                self.print_status(f"🌐 Development server ready at {local_match.group(1)}", "success")
                         if "Network:" in line:
                             network_match = re.search(r'(https?://\S+)', line)
                             if network_match:
-                                print(f"➜ Network URL: {network_match.group(1)}\n")
-                    
-                    formatted_line = format_output(prefix, line, is_error)
+                                self.print_status(f"🔗 Network access URL: {network_match.group(1)}", "success")
+                        continue
+
+                    formatted_line = self.format_output(prefix, line, is_error)
                     with buffer_lock:
                         output_buffer.append(formatted_line)
                         print(formatted_line)
-        
+
         threading.Thread(target=read_stream, args=(process.stdout,), daemon=True).start()
         threading.Thread(target=read_stream, args=(process.stderr, True), daemon=True).start()
 

@@ -9,7 +9,7 @@ export const normalizeProduct = (product: Product, source: SourceType): Product 
     uid: generateUID(),
     'Product ID': product['Product ID'] || generateUID(),
     'Price': formatPrice(normalizePrice(product.Price)),
-    stock: normalizeStockStatus(product.stock),
+    'Stock': normalizeStockStatus(product.Stock),
   };
 };
 

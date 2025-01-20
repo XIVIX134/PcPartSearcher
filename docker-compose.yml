@@ -1,41 +1,31 @@
+version: '3.8'
+
 services:
   client:
-    build: 
-      context: ./client
-      dockerfile: Dockerfile
-      args:
-        - NODE_ENV=production
+    build:
+      context: .
+      dockerfile: client/Dockerfile
     ports:
-      - "5173:5173"
-    environment:
-      - NODE_ENV=production
-    depends_on:
-      - server
+      - "4173:4173"
     networks:
       - app-network
-    extra_hosts:
-      - "server:host-gateway"
-    dns:
-      - 8.8.8.8
+    depends_on:
+      - server
 
   server:
     build:
-      context: ./server
-      dockerfile: Dockerfile
-      args:
-        - FLASK_ENV=production
+      context: .
+      dockerfile: server/Dockerfile
+    volumes:
+      - ./server:/app
+      - ./scrapers:/app/scrapers
+    environment:
+      - PYTHONPATH=/app
     ports:
       - "5000:5000"
-    environment:
-      - FLASK_ENV=production
-      - FLASK_APP=run.py
     networks:
       - app-network
-    container_name: server
 
 networks:
   app-network:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16

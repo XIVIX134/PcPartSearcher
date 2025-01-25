@@ -15,7 +15,6 @@ from colorama import init, Fore, Back, Style
 
 class Run_All:
     def __init__(self):
-        # Initialize colorama for Windows support
         init(autoreset=True)
         
         backend_process = None

@@ -1,7 +1,12 @@
 import asyncio
+import json
 import aiohttp
 from bs4 import BeautifulSoup
 import re
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("SigmaSpyder")
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/109.0",
@@ -25,6 +30,7 @@ class SigmaSpyder:
             "submit_search": "",
             "route": "product/search"
         }
+        logger.info(f"Searching for: {search_term} in Sigma Computer")
 
     @staticmethod
     def sanitize_filename(search_term):
@@ -32,10 +38,8 @@ class SigmaSpyder:
 
     async def fetch_data(self, session):
         async with session.get(self.base_url, params=self.params) as response:
-            if response.status != 200:
-                print(f"Failed to fetch data: {response.status}")
-                return None
-            return await response.text()
+            content = await response.text()
+            return content
 
     def parse_product(self, product):
         try:
@@ -82,10 +86,10 @@ class SigmaSpyder:
                 "Page": 1
             }
         except Exception as e:
-            print(f"Error parsing product: {e}")
+            logger.error(f"Error parsing product: {str(e)}")
             return None
 
-    async def scrape(self):
+    async def scrap(self):
         async with aiohttp.ClientSession(headers=HEADERS) as session:
             content = await self.fetch_data(session)
             if not content:
@@ -99,14 +103,14 @@ class SigmaSpyder:
                 product_data = self.parse_product(product)
                 if product_data:
                     results.append(product_data)
+        logger.info(f"Found {len(results)} products in Sigma Computer")
         
         return results
 
-# # Example usage in an async function:
-# async def main():
-#     spyder = SigmaSpyder("laptop")
-#     results = await spyder.scrape()
-#     with open('sigma_results.json', 'w') as f:
-#       f.write(json.dumps(results, indent=2))
 
-# asyncio.run(main())
+if __name__ == "__main__":
+    search_term = "rtx"
+    spyder = SigmaSpyder(search_term)
+    results = asyncio.run(spyder.scrap())
+    with open("sigma_results.json", "w") as f:
+        f.write(json.dumps(results, indent=2))

@@ -37,7 +37,7 @@ class SearchModel:
 
             if source_filters.get('sigma'):
                 sigma_spyder = SigmaSpyder(search_term)
-                tasks.append(loop.run_in_executor(executor, self.run_spyder, sigma_spyder, sigma_spyder.scrape))
+                tasks.append(loop.run_in_executor(executor, self.run_spyder, sigma_spyder, sigma_spyder.scrap))
 
             if source_filters.get('alfrensia'):
                 alfrensia_spyder = ALFrensia_Spyder()

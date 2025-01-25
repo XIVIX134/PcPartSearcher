@@ -93,8 +93,8 @@ class AmazonSpyder:
 
 
 # Example usage
-if __name__ == "__main__":
-    spyder = AmazonSpyder()
-    results = asyncio.run(spyder.scrap("rtx"))
-    with open("amazon_results.json", "w") as f:
-        f.write(json.dumps(results, indent=2))
+# if __name__ == "__main__":
+#     spyder = AmazonSpyder()
+#     results = asyncio.run(spyder.scrap("rtx"))
+#     with open("amazon_results.json", "w") as f:
+#         f.write(json.dumps(results, indent=2))

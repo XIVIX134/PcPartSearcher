@@ -12,7 +12,7 @@ logger = logging.getLogger("AmazonSpyder")
 # Number of concurrent requests
 CONCURRENT_REQUESTS = 10
 
-# User-Agent pool to randomize headers
+# User-Agent pool to randomize headers to avoid detection (untested in production) :(
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.61 Safari/537.36",
@@ -34,7 +34,7 @@ class AmazonSpyder:
         """Fetch a single page and parse results."""
         async with self.semaphore:
             url = f"https://www.amazon.eg/s?k={search_term}&language=en&page={page}"
-            self.headers["User-Agent"] = random.choice(USER_AGENTS)  # Rotate User-Agent
+            self.headers["User-Agent"] = random.choice(USER_AGENTS)  # Rotate User-Agent, untested in production yet :(
             
             try:
                 response = await client.get(url, headers=self.headers)
@@ -78,7 +78,7 @@ class AmazonSpyder:
                 logger.error(f"Error fetching page {page}: {str(e)}")
                 return []
 
-    async def search_products_async(self, search_term: str) -> List[Dict[str, Any]]:
+    async def scrap(self, search_term: str) -> List[Dict[str, Any]]:
         """Scrape products concurrently."""
         timeout = httpx.Timeout(30.0, connect=10.0)
         limits = httpx.Limits(max_connections=CONCURRENT_REQUESTS, max_keepalive_connections=20)
@@ -91,14 +91,10 @@ class AmazonSpyder:
         products = [product for result in all_results if result for product in result]
         return products
 
-    def scrap(self, search_term: str) -> List[Dict[str, Any]]:
-        """Synchronous wrapper for async scraping."""
-        results = asyncio.run(self.search_products_async(search_term))
-        return results
 
 # Example usage
 if __name__ == "__main__":
     spyder = AmazonSpyder()
-    results = spyder.scrap("rtx")
+    results = asyncio.run(spyder.scrap("rtx"))
     with open("amazon_results.json", "w") as f:
         f.write(json.dumps(results, indent=2))

@@ -25,7 +25,7 @@ class SearchModel:
 
             if source_filters.get('amazon'):
                 amazon_spyder = AmazonSpyder()
-                tasks.append(loop.run_in_executor(executor, self.run_spyder, amazon_spyder, amazon_spyder.search_products_async, search_term))
+                tasks.append(loop.run_in_executor(executor, self.run_spyder, amazon_spyder, amazon_spyder.scrap, search_term))
 
             if source_filters.get('olx'):
                 olx_spyder = OLX_Spyder(search_term)

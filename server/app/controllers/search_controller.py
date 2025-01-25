@@ -1,7 +1,6 @@
 from fastapi import HTTPException
 from app.models.search_model import SearchModel
 from server.app.utils.search_utils import format_search_results
-from pydantic import BaseModel
 
 
 async def search_controller(search_term, source_filters):
@@ -15,4 +14,4 @@ async def search_controller(search_term, source_filters):
         return formatted_results
     
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"[ CONTROLL ] Search failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"[ CONTROLLER ] Search failed: {str(e)}")

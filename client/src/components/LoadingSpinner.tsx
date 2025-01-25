@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import '@styles/LoadingSpinner.css';
 
 const LOADING_TEXT = 'SEARCHING';
@@ -37,11 +37,12 @@ export const LoadingSpinner = ({ className = '', onReset, autoReset = false }: L
   const frameRef = useRef<number>();
 
   // Translates Ticker.prototype.getChar
-  const getChar = () =>
-    CHARS[Math.floor(Math.random() * charsCount)];
+  const getChar = useCallback(() => {
+    return CHARS[Math.floor(Math.random() * charsCount)];
+  }, []);
 
   // Translates Ticker.prototype.reset
-  const resetTicker = () => {
+  const resetTicker = useCallback(() => {
     doneRef.current = false;
     cycleCurrent.current = 0;
     letterCurrent.current = 0;
@@ -60,10 +61,10 @@ export const LoadingSpinner = ({ className = '', onReset, autoReset = false }: L
       })));
       requestAnimationFrame(loop); // Kick off again
     }, 0);
-  };
+  }, [loop]);
 
   // Translates Ticker.prototype.loop
-  const loop = () => {
+  const loop = useCallback(() => {
     setLetters(prev => {
       const updated = [...prev];
       
@@ -112,7 +113,7 @@ export const LoadingSpinner = ({ className = '', onReset, autoReset = false }: L
     });
 
     frameRef.current = requestAnimationFrame(loop);
-  };
+  }, [getChar]);
 
   // On mount, just start the loop
   useEffect(() => {

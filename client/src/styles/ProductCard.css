@@ -12,10 +12,13 @@
   flex-direction: column;
   max-width: 300px;
   margin: 0 auto;
-  width: 100%;
+    width: 300px;
   position: relative;
   padding: 0;
-  height: 100%; /* Make card fill container */
+  height: 100%;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 10px;
 }
 
 .product-card:hover {

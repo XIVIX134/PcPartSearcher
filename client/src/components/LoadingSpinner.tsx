@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import '@styles/LoadingSpinner.css';
 
 const LOADING_TEXT = 'SEARCHING';
@@ -37,33 +37,12 @@ export const LoadingSpinner = ({ className = '', onReset, autoReset = false }: L
   const frameRef = useRef<number>();
 
   // Translates Ticker.prototype.getChar
-  const getChar = () =>
-    CHARS[Math.floor(Math.random() * charsCount)];
-
-  // Translates Ticker.prototype.reset
-  const resetTicker = () => {
-    doneRef.current = false;
-    cycleCurrent.current = 0;
-    letterCurrent.current = 0;
-    setLetters(prev => prev.map(letter => ({
-      ...letter,
-      current: letter.original, // Reset to original text visually
-      done: false
-    })));
-    // Then replace them all with '-' to restart just like jQuery
-    // in the next tick, so it toggles again as in the original code
-    setTimeout(() => {
-      setLetters(prev => prev.map(letter => ({
-        ...letter,
-        current: letter.original === ' ' ? ' ' : '-',
-        done: false
-      })));
-      requestAnimationFrame(loop); // Kick off again
-    }, 0);
-  };
+  const getChar = useCallback(() => {
+    return CHARS[Math.floor(Math.random() * charsCount)];
+  }, [charsCount]);
 
   // Translates Ticker.prototype.loop
-  const loop = () => {
+  const loop = useCallback(() => {
     setLetters(prev => {
       const updated = [...prev];
       
@@ -112,7 +91,29 @@ export const LoadingSpinner = ({ className = '', onReset, autoReset = false }: L
     });
 
     frameRef.current = requestAnimationFrame(loop);
-  };
+  }, [getChar, letterCount]);
+
+  // Translates Ticker.prototype.reset
+  const resetTicker = useCallback(() => {
+    doneRef.current = false;
+    cycleCurrent.current = 0;
+    letterCurrent.current = 0;
+    setLetters(prev => prev.map(letter => ({
+      ...letter,
+      current: letter.original, // Reset to original text visually
+      done: false
+    })));
+    // Then replace them all with '-' to restart just like jQuery
+    // in the next tick, so it toggles again as in the original code
+    setTimeout(() => {
+      setLetters(prev => prev.map(letter => ({
+        ...letter,
+        current: letter.original === ' ' ? ' ' : '-',
+        done: false
+      })));
+      requestAnimationFrame(loop); // Kick off again
+    }, 0);
+  }, [loop]);
 
   // On mount, just start the loop
   useEffect(() => {
@@ -128,7 +129,7 @@ export const LoadingSpinner = ({ className = '', onReset, autoReset = false }: L
         cancelAnimationFrame(frameRef.current);
       }
     };
-  }, [onReset, autoReset]);
+  }, [onReset, autoReset, loop, resetTicker]);
 
   return (
     <div className={`loader-wrapper ${className}`}>

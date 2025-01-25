@@ -12,4 +12,8 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}
+
 app.include_router(search_bp, prefix="/api")

@@ -25,7 +25,7 @@ export default defineConfig({
         secure: false,
         ws: true,
         rewrite: (path) => path.replace(/^\/api/, '/api'),
-        configure: (proxy, _options) => {
+        configure: (proxy) => {
           proxy.on('error', (err, _req, res) => {
             console.error('Proxy error:', err);
             if (!res.writableEnded) {
@@ -35,10 +35,10 @@ export default defineConfig({
               res.end(JSON.stringify({ error: 'Proxy Error', message: err.message }));
             }
           });
-          proxy.on('proxyReq', (proxyReq, req, _res) => {
+          proxy.on('proxyReq', (_proxyReq, req) => {
             console.log('Sending Request to the Target:', req.method, req.url);
           });
-          proxy.on('proxyRes', (proxyRes, req, _res) => {
+          proxy.on('proxyRes', (proxyRes, req) => {
             console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
           });
         },

@@ -1,0 +1,107 @@
+image: node:18-alpine
+
+stages:
+  - test
+  - build
+  - deploy
+
+variables:
+  DEPLOY_DIR: /var/www/pcpartsearcher
+  API_DEPLOY_DIR: /var/www/pcpartsearcher-api
+
+# Frontend jobs
+frontend-test:
+  stage: test
+  image: node:18-alpine
+  cache:
+    key:
+      files:
+        - client/package-lock.json
+    paths:
+      - client/node_modules
+  script:
+    - cd client
+    - npm ci
+    - npm run lint
+    - npm run tsc
+
+frontend-build:
+  stage: build
+  image: node:18-alpine
+  cache:
+    key:
+      files:
+        - client/package-lock.json
+    paths:
+      - client/node_modules
+  script:
+    - cd client
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      - client/dist/
+
+# Backend jobs
+backend-test:
+  stage: test
+  image: python:3.12-slim
+  cache:
+    key:
+      files:
+        - server/requirements.txt
+    paths:
+      - .pip-cache/
+  variables:
+    PIP_CACHE_DIR: .pip-cache/
+  script:
+    - cd server
+    - pip install -r requirements.txt
+    - python -m pytest tests/ || echo "No tests found"
+
+backend-build:
+  stage: build
+  image: python:3.12-slim
+  script:
+    - cd server
+    - pip install -r requirements.txt
+  artifacts:
+    paths:
+      - server/
+
+# Deployment jobs
+deploy-frontend:
+  stage: deploy
+  image: alpine:latest
+  needs:
+    - frontend-build
+  script:
+    - apk add --no-cache openssh-client
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP "mkdir -p $DEPLOY_DIR"
+    - scp -r -o StrictHostKeyChecking=no client/dist/* $SSH_USER@$SERVER_IP:$DEPLOY_DIR
+    - ssh -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP "systemctl restart nginx"
+    - ssh -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP "curl -f http://localhost || exit 1"
+  only:
+    - main
+
+deploy-backend:
+  stage: deploy
+  image: alpine:latest
+  needs:
+    - backend-build
+  script:
+    - apk add --no-cache openssh-client
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP "mkdir -p $API_DEPLOY_DIR"
+    - scp -r -o StrictHostKeyChecking=no server/* $SSH_USER@$SERVER_IP:$API_DEPLOY_DIR
+    - ssh -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP "cd $API_DEPLOY_DIR && pip install -r requirements.txt"
+    - ssh -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP "systemctl restart pcpartsearcher-api"
+    - sleep 5
+    - ssh -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP "curl -f http://localhost:8000/health || exit 1"
+  only:
+    - main

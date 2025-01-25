@@ -15,11 +15,14 @@
     - [ ] Add wishlists to the frontend
 # Backend
   - Loay:
-    - [ ] Fix el badr and elfrncia spyders
+    - [ ] Fix elfrncia spyders
+    - [X] Add Support for El Badr Group
     - [X] Add Support for OLX (https://www.dubizzle.com.eg/en/)
     - [X] Add support for Sigma (https://www.sigma-computer.com/)
     - [X] Add support for Amazon (https://amazon.eg/)
     - [X] Add support for alfrensia (https://alfrensia.com/)
+    - [X] Create Transmittion from Flask to FastAPI
+    - [X] Use MVC
     - [ ] Add support for Compumarts (https://www.compumarts.com/)
     - [ ] Add support for Barakacomputer (https://barakacomputer.net/)
     - [ ] Add support for Hankerz (https://www.hankerz.com.eg/)

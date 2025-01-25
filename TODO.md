@@ -15,7 +15,7 @@
     - [ ] Add wishlists to the frontend
 # Backend
   - Loay:
-    - [ ] Fix el badr's spyder
+    - [ ] Fix el badr and elfrncia spyders
     - [X] Add Support for OLX (https://www.dubizzle.com.eg/en/)
     - [X] Add support for Sigma (https://www.sigma-computer.com/)
     - [X] Add support for Amazon (https://amazon.eg/)

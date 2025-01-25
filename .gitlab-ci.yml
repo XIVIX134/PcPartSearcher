@@ -9,6 +9,9 @@ variables:
 
 build-website:
   stage: build
+  image: node:18-alpine
+  services:
+    - docker:dind
   script:
     - cd client
     - npm install
@@ -18,17 +21,22 @@ build-website:
       - client/dist/
 
 deploy-website:
-    stage: deploy
-    tags:
-      - deployment
-    image: alpine/git:latest
-    script:
-      - apk add openssh-client
-      - mkdir -p ~/.ssh
-      - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
-      - chmod 600 ~/.ssh/id_rsa
-      - ssh -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP "mkdir -p $DEPLOY_DIR && rm -rf $DEPLOY_DIR/*"
-      - scp -r -o StrictHostKeyChecking=no client/dist/* $SSH_USER@$SERVER_IP:$DEPLOY_DIR
-      - ssh -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP "systemctl restart nginx"
-    only:
-      - main
+  stage: deploy
+  image: alpine/git:latest
+  tags:
+    - deployment # Ensure this tag matches your runner
+  script:
+    - apk add openssh-client
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - echo "DEBUG: Listing home directory before ssh"
+    - ssh -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP "ls -la ~"
+    - echo "DEBUG: Attempting ssh command"
+    - ssh -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP "mkdir -p $DEPLOY_DIR && rm -rf $DEPLOY_DIR/*"
+    - echo "DEBUG: Attempting SCP command"
+    - scp -rv -o StrictHostKeyChecking=no client/dist/* $SSH_USER@$SERVER_IP:$DEPLOY_DIR
+    - echo "DEBUG: Attempting systemctl command"
+    - ssh -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP "systemctl restart nginx"
+  only:
+    - main

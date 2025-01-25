@@ -1,4 +1,4 @@
-export const setCookie = (name: string, value: any, days: number = 365) => {
+export const setCookie = (name: string, value: unknown, days: number = 365) => {
   const expires = new Date();
   expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
   document.cookie = `${name}=${JSON.stringify(value)};expires=${expires.toUTCString()};path=/`;

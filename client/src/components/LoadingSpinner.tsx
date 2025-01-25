@@ -128,7 +128,7 @@ export const LoadingSpinner = ({ className = '', onReset, autoReset = false }: L
         cancelAnimationFrame(frameRef.current);
       }
     };
-  }, [onReset, autoReset]);
+  }, [onReset, autoReset, loop, resetTicker]);
 
   return (
     <div className={`loader-wrapper ${className}`}>

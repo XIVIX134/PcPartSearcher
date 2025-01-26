@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 BASE_URL = "https://www.dubizzle.com.eg"
-BATCH_SIZE = 5  # Number of concurrent requests
+BATCH_SIZE = 10  # Increased number of concurrent requests
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/109.0",
@@ -29,8 +29,8 @@ class OLX_Spyder:
         self.search_term = search_term.replace(' ', '-')
         self.base_search_url = f"https://www.dubizzle.com.eg/en/electronics-home-appliances/computers-accessories/q-{self.search_term}"
 
-    async def fetch_page(self, session: aiohttp.ClientSession, url: str, page: int) -> Optional[List[Dict[str, Any]]]:
-        """Fetches and parses a single page"""
+    async def fetch_page(self, session: aiohttp.ClientSession, url: str, page: int) -> Optional[str]:
+        """Fetches a single page"""
         try:
             async with session.get(url, headers=HEADERS) as response:
                 if response.status == 404:
@@ -39,51 +39,54 @@ class OLX_Spyder:
 
                 if response.status != 200:
                     logger.error(f"Failed to fetch page {page}. Status: {response.status}")
-                    return []
+                    return None
 
                 html = await response.text()
-                soup = BeautifulSoup(html, 'html.parser')
-
-                data_list = []
-                listings = soup.find_all('li', attrs={'aria-label': 'Listing'})
-
-                for listing in listings:
-                    title_tag = listing.find('h2', class_='_941ffa5e')
-                    price_tag = listing.find('span', class_='_1f2a2b47')
-                    location_tag = listing.find('span', class_='_77000f35')
-                    image_tag = listing.find('img', class_='f79152f1')
-                    link_tag = listing.find('a', href=True)
-
-                    if link_tag:
-                        details_link = BASE_URL + link_tag['href']
-                        match = re.search(r'-ID(\d+)', link_tag['href'])
-                        product_id = match.group(1) if match else "N/A"
-                    else:
-                        details_link = product_id = "N/A"
-
-                    data_list.append({
-                        "Product ID": product_id,
-                        "Title": title_tag.text.strip() if title_tag else "N/A",
-                        "Price": price_tag.text.strip() if price_tag else "N/A",
-                        "Tax": "0 EGP",
-                        "Location": location_tag.text.strip() if location_tag else "N/A",
-                        "Details Link": details_link,
-                        "Image URL": image_tag['src'] if image_tag else "N/A",
-                        "Stock": "Contact Owner", 
-                        "Brand": "N/A",
-                        "Model": "N/A",
-                        "Labels": ["Used", "No Warranty", "C2C"],
-                        "Rating": 5,
-                        "Description": title_tag.text.strip() if title_tag else "N/A",
-                        "Page": page
-                    })
-
-                logger.info(f"Found {len(data_list)} listings on page {page}")
-                return data_list
+                return html
 
         except Exception as e:
             logger.error(f"Error fetching page {page}: {str(e)}")
-            return []
+            return None
+
+    def parse_page(self, html: str, page: int) -> List[Dict[str, Any]]:
+        """Parses a single page"""
+        soup = BeautifulSoup(html, 'html.parser')
+        data_list = []
+        listings = soup.find_all('li', attrs={'aria-label': 'Listing'})
+
+        for listing in listings:
+            title_tag = listing.find('h2', class_='_941ffa5e')
+            price_tag = listing.find('span', class_='_1f2a2b47')
+            location_tag = listing.find('span', class_='_77000f35')
+            image_tag = listing.find('img', class_='f79152f1')
+            link_tag = listing.find('a', href=True)
+
+            if link_tag:
+                details_link = BASE_URL + link_tag['href']
+                match = re.search(r'-ID(\d+)', link_tag['href'])
+                product_id = match.group(1) if match else "N/A"
+            else:
+                details_link = product_id = "N/A"
+
+            data_list.append({
+                "Product ID": product_id,
+                "Title": title_tag.text.strip() if title_tag else "N/A",
+                "Price": price_tag.text.strip() if price_tag else "N/A",
+                "Tax": "0 EGP",
+                "Location": location_tag.text.strip() if location_tag else "N/A",
+                "Details Link": details_link,
+                "Image URL": image_tag['src'] if image_tag else "N/A",
+                "Stock": "Contact Owner", 
+                "Brand": "N/A",
+                "Model": "N/A",
+                "Labels": ["Used", "No Warranty", "C2C"],
+                "Rating": 5,
+                "Description": title_tag.text.strip() if title_tag else "N/A",
+                "Page": page
+            })
+
+        logger.info(f"Found {len(data_list)} listings on page {page}")
+        return data_list
 
     async def scrape_olx_async(self) -> List[Dict[str, Any]]:
         """Scrapes all pages concurrently in batches"""
@@ -92,11 +95,11 @@ class OLX_Spyder:
 
         async with aiohttp.ClientSession() as session:
             # First get page 1 to check if search has results
-            first_page = await self.fetch_page(session, self.base_search_url, 1)
-            if not first_page:
+            first_page_html = await self.fetch_page(session, self.base_search_url, 1)
+            if not first_page_html:
                 return []
 
-            all_results = first_page
+            all_html_pages = [first_page_html]
             current_page = 2
 
             while True:
@@ -112,23 +115,28 @@ class OLX_Spyder:
 
                 # Process results and check for end of pages
                 found_404 = False
-                new_results = []
+                new_html_pages = []
 
                 for result in batch_results:
                     if result is None:  # 404 encountered
                         found_404 = True
                         break
                     if result:
-                        new_results.extend(result)
+                        new_html_pages.append(result)
 
-                all_results.extend(new_results)
+                all_html_pages.extend(new_html_pages)
 
-                if found_404 or not new_results:
+                if found_404 or not new_html_pages:
                     break
 
                 current_page += BATCH_SIZE
-                if current_page > 20:  # Safety limit
+                if current_page > 50:  # Increased safety limit
                     break
+
+            # Parse all fetched pages
+            all_results = []
+            for page_num, html in enumerate(all_html_pages, start=1):
+                all_results.extend(self.parse_page(html, page_num))
 
             return all_results
 
@@ -144,4 +152,4 @@ async def main():
       f.write(json.dumps(results, indent=2))
 
 if __name__ == "__main__":
-    asyncio.run(main()) 
+    asyncio.run(main())

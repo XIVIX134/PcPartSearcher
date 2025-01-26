@@ -98,21 +98,7 @@ deploy-backend:
     - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "command -v pip3 >/dev/null 2>&1 || python3 -m ensurepip"
     - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "yum install -y gcc python3-devel"
     - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "cd $API_DEPLOY_DIR && pip3 install -r requirements.txt"
-    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "echo '[Unit]
-Description=PcPartSearcher API
-After=network.target
-
-[Service]
-User=root
-WorkingDirectory=$API_DEPLOY_DIR
-ExecStart=/usr/bin/python3 $API_DEPLOY_DIR/run.py
-Restart=always
-
-[Install]
-WantedBy=multi-user.target' > /etc/systemd/system/pcpartsearcher-api.service"
-    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "systemctl daemon-reload"
-    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "systemctl enable pcpartsearcher-api"
-    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "systemctl start pcpartsearcher-api"
+    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "systemctl restart pcpartsearcher-api"
     - sleep 5
     - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "curl -f http://localhost:8000/health || exit 1"
   only:

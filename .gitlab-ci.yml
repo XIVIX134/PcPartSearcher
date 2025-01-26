@@ -104,6 +104,6 @@ deploy-backend:
     - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "systemctl enable pcpartsearcher-api"
     - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "systemctl restart pcpartsearcher-api"
     - sleep 5
-    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "curl -f http://localhost:8000/health || exit 1"
+    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "curl -f http://localhost:3500/health || exit 1"
   only:
     - main

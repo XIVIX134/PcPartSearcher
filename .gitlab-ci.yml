@@ -76,14 +76,11 @@ deploy-frontend:
   needs:
     - frontend-build
   script:
-    - apk add --no-cache openssh-client
-    - mkdir -p ~/.ssh
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
-    - chmod 600 ~/.ssh/id_rsa
-    - ssh -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP "mkdir -p $DEPLOY_DIR"
-    - scp -r -o StrictHostKeyChecking=no client/dist/* $SSH_USER@$SERVER_IP:$DEPLOY_DIR
-    - ssh -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP "systemctl restart nginx"
-    - ssh -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP "curl -f http://localhost || exit 1"
+    - apk add --no-cache openssh-client sshpass
+    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "mkdir -p $DEPLOY_DIR"
+    - sshpass -p "$SSH_PASSWORD" scp -r -o StrictHostKeyChecking=no client/dist/* root@$SERVER_IP:$DEPLOY_DIR
+    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "systemctl restart nginx"
+    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "curl -f http://localhost || exit 1"
   only:
     - main
 
@@ -93,15 +90,12 @@ deploy-backend:
   needs:
     - backend-build
   script:
-    - apk add --no-cache openssh-client
-    - mkdir -p ~/.ssh
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
-    - chmod 600 ~/.ssh/id_rsa
-    - ssh -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP "mkdir -p $API_DEPLOY_DIR"
-    - scp -r -o StrictHostKeyChecking=no server/* $SSH_USER@$SERVER_IP:$API_DEPLOY_DIR
-    - ssh -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP "cd $API_DEPLOY_DIR && pip install -r requirements.txt"
-    - ssh -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP "systemctl restart pcpartsearcher-api"
+    - apk add --no-cache openssh-client sshpass
+    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "mkdir -p $API_DEPLOY_DIR"
+    - sshpass -p "$SSH_PASSWORD" scp -r -o StrictHostKeyChecking=no server/* root@$SERVER_IP:$API_DEPLOY_DIR
+    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "cd $API_DEPLOY_DIR && pip install -r requirements.txt"
+    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "systemctl restart pcpartsearcher-api"
     - sleep 5
-    - ssh -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP "curl -f http://localhost:8000/health || exit 1"
+    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "curl -f http://localhost:8000/health || exit 1"
   only:
     - main

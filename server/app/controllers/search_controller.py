@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from app.models.search_model import SearchModel
-from server.app.utils.search_utils import format_search_results
+from app.utils.search_utils import format_search_results
 
 
 async def search_controller(search_term, source_filters):

@@ -13,38 +13,16 @@
   min-width: 40px;
   height: 40px;
   border: calc(0.08 * var(--m)) solid transparent;
-  background: linear-gradient(var(--background-color), var(--background-color)), 
-              linear-gradient(var(--background-color) 50%, rgba(18, 18, 19, 0.6) 80%, rgba(18, 18, 19, 0)),  
-              linear-gradient(90deg, var(--orange), var(--yellow), var(--green), var(--blue), var(--purple), var(--pink), var(--red));
-  background-origin: border-box;
-  background-clip: padding-box, border-box, border-box;
+  background: var(--card-background);
   color: var(--text-color);
   cursor: pointer;
   position: relative;
   transition: all 0.2s ease;
 }
 
-.toggle-btn::before {
-  content: '';
-  background: linear-gradient(90deg, var(--orange), var(--yellow), var(--green), var(--blue), var(--purple), var(--pink), var(--red));
-  height: 30%;
-  width: 60%;
-  position: absolute;
-  bottom: -20%;
-  z-index: -5;
-  background-size: 200%;
-  filter: blur(calc(0.4 * var(--m)));
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.toggle-btn:hover::before {
-  opacity: 1;
-}
-
 .toggle-btn:hover {
-  border-color: var(--primary-color);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .toggle-btn.active {
@@ -65,6 +43,7 @@
   width: 20px;
   height: 20px;
   transition: transform 0.2s ease;
+  color: var(--text-color);
 }
 
 .toggle-btn:hover svg {

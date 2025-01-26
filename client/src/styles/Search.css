@@ -13,7 +13,7 @@
 }
 
 .search-container.has-results {
-  min-height: auto;
+  min-height: 0;
   transform: translateY(0);
   justify-content: flex-start; /* Only change alignment when there are results */
   margin-top: 2rem;
@@ -35,6 +35,8 @@
   width: 100%;
   max-width: 400px;
   margin: 0 auto;
+  font-family: "Funnel Display", system-ui;
+  font-weight: var(--font-regular);
 }
 
 .search-input:hover {
@@ -84,15 +86,59 @@
   max-width: 800px;
 }
 
-.search-button {
+.search-button,
+.filters-toggle,
+.pagination button {
+  background: linear-gradient(var(--background-color), var(--background-color)), 
+              linear-gradient(var(--background-color) 50%, rgba(18, 18, 19, 0.6) 80%, rgba(18, 18, 19, 0)),  
+              linear-gradient(90deg, var(--orange), var(--yellow), var(--green), var(--blue), var(--purple), var(--pink), var(--red));
+  background-origin: border-box;
+  background-clip: padding-box, border-box, border-box;
+  background-size: 200%;
+  animation: animate 2s infinite linear;
+  font-family: "Funnel Display", system-ui;
+  font-weight: var(--font-medium);
   padding: 0.75rem 1.5rem;
   font-size: 0.9rem;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.search-button::before,
+.filters-toggle::before,
+.pagination button::before {
+  content: '';
+  background: linear-gradient(90deg, var(--orange), var(--yellow), var(--green), var(--blue), var(--purple), var(--pink), var(--red));
+  height: 30%;
+  width: 60%;
+  position: absolute;
+  bottom: -20%;
+  z-index: -5;
+  background-size: 200%;
+  animation: animate 2s infinite linear;
+  filter: blur(calc(0.8 * var(--m)));
+}
+
+.search-button {
   min-width: 100px;
   white-space: nowrap;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
   gap: 0.5rem;
+}
+
+.filters-toggle {
+  min-width: auto;
+  padding: calc(0.5 * 0.75rem) calc(1 * 0.75rem);
+}
+
+.pagination button {
+  min-width: 100px;
 }
 
 .search-button .loader {
@@ -142,6 +188,8 @@
   color: var(--text-color);
   font-size: 1.2rem;
   opacity: 0.7;
+  font-family: "Funnel Display", system-ui;
+  font-weight: var(--font-regular);
 }
 
 .results-container {
@@ -287,30 +335,12 @@
 
   .search-container {
     padding: 1rem;
-    min-height: 80vh; /* Give it most of the viewport height */
-    display: flex;
+    min-height: 0;
     justify-content: center;
     align-items: center;
   }
 
   /* Only change alignment when there are actual results */
-  .search-container.has-results {
-    min-height: auto;
-    justify-content: flex-start;
-    margin-top: 0;
-  }
-
-  /* Remove the flex-start alignment that was conflicting */
-  .search-page {
-    padding-top: 1rem;
-  }
-
-  .search-container {
-    padding: 1rem;
-    min-height: auto;
-    justify-content: center; /* Keep centered on mobile */
-  }
-
   .search-container.has-results {
     justify-content: flex-start;
     margin-top: 0;
@@ -361,6 +391,7 @@
   opacity: 1; /* Ensure title is always visible */
   position: relative; /* Add for possible glow effects */
   z-index: 1; /* Keep above other elements */
+  font-weight: var(--font-bold);
 }
 
 @media (max-width: 768px) {
@@ -371,7 +402,7 @@
 
   .search-container {
     padding: 1rem;
-    min-height: auto;
+    min-height: 0; /* Changed from auto */
   }
 
   .search-container.has-results {
@@ -394,6 +425,8 @@
   color: var(--text-color);
   opacity: 0.8;
   font-size: 0.9rem;
+  font-family: "Funnel Display", system-ui;
+  font-weight: var(--font-light);
 }
 
 .pagination {
@@ -408,10 +441,8 @@
 .pagination span {
   font-size: 0.9rem;
   color: var(--text-color);
-}
-
-.pagination button {
-  min-width: 100px;
+  font-family: "Funnel Display", system-ui;
+  font-weight: var(--font-regular);
 }
 
 .header-left {
@@ -420,44 +451,8 @@
   gap: 1rem;
 }
 
-.filters-toggle {
-  padding: calc(0.5 * 0.75rem) calc(1 * 0.75rem);
-  font-size: 0.9rem;
-  border-radius: 8px;
-  min-width: auto;
-  color: #F3F3F3;
-  font-family: 'Space Grotesk';
-  cursor: pointer;
-  border: 2px solid transparent;
-  position: relative;
-  display: flex;
-  justify-content: center;
-  z-index: 1;
-  
-  background: linear-gradient(#121213, #121213), 
-              linear-gradient(#121213 50%, rgba(18, 18, 19, 0.6) 80%, rgba(18, 18, 19, 0)),  
-              linear-gradient(90deg, var(--orange), var(--yellow), var(--green), var(--blue), var(--purple), var(--pink), var(--red));
-  background-origin: border-box;
-  background-clip: padding-box, border-box, border-box;
-  background-size: 200%;
-  animation: animate 2s infinite linear;
-}
-
 .filters-toggle::before {
-  content: '';
-  background: linear-gradient(90deg, var(--orange), var(--yellow), var(--green), var(--blue), var(--purple), var(--pink), var(--red));
-  height: 100%;
-  width: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: -1;
-  background-size: 200%;
-  animation: animate 2s infinite linear;
-  filter: blur(15px);
-  opacity: 0;
-  transition: opacity 0.3s;
-  transform: translateY(30%) scale(0.8);
+  display: block;
 }
 
 .filters-toggle:hover::before {

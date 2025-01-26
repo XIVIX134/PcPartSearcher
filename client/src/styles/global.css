@@ -1,5 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=Space%20Grotesk:700|Space%20Grotesk:400');
-@import url('https://fonts.googleapis.com/css?family=IBM%20Plex%20Sans:600|IBM%20Plex%20Sans:400');
+@import url('https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300;400;500;600;700;800&display=swap');
 
 :root {
   --primary-color: #007bff;
@@ -23,6 +22,56 @@
   --orange: #FF6D1B;
   --color1: #B071FF;
   --color2: #FF9C71;
+  
+  /* Funnel Display font variables */
+  --font-light: 300;
+  --font-regular: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+}
+
+/* Base font classes */
+.funnel-display-base {
+  font-family: "Funnel Display", serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+.funnel-display-heading {
+  font-family: "Funnel Display", serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-weight: var(--font-bold);
+}
+
+.funnel-display-subheading {
+  font-family: "Funnel Display", serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-weight: var(--font-semibold);
+}
+
+.funnel-display-body {
+  font-family: "Funnel Display", serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-weight: var(--font-regular);
+}
+
+.funnel-display-light {
+  font-family: "Funnel Display", serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-weight: var(--font-light);
+}
+
+.funnel-display-emphasis {
+  font-family: "Funnel Display", serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-weight: var(--font-medium);
 }
 
 * {
@@ -31,8 +80,10 @@
   box-sizing: border-box;
 }
 
+/* Element Templates */
 body {
-  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto;
+  font-family: "Funnel Display", -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto;
+  font-weight: var(--font-regular);
   background-color: var(--background-color);
   color: var(--text-color);
   line-height: 1.5;
@@ -50,18 +101,48 @@ body::before {
 }
 
 h1 {
+  font-family: "Funnel Display", serif;
+  font-weight: var(--font-bold);
   color: var(--primary-color);
   font-size: 2.5rem;
-  font-weight: 700;
   margin-bottom: 2rem;
   text-align: center;
+}
+
+h2 {
+  font-family: "Funnel Display", serif;
+  font-weight: var(--font-semibold);
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+h3 {
+  font-family: "Funnel Display", serif;
+  font-weight: var(--font-semibold);
+  font-size: 1.75rem;
+  margin-bottom: 1.25rem;
+}
+
+h4 {
+  font-family: "Funnel Display", serif;
+  font-weight: var(--font-medium);
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+p {
+  font-family: "Funnel Display", serif;
+  font-weight: var(--font-regular);
+  font-size: 1rem;
+  line-height: 1.6;
 }
 
 button {
   border: calc(0.08 * var(--m)) solid transparent;
   position: relative;
   color: var(--text-color);
-  font-family: 'Space Grotesk', system-ui;
+  font-family: "Funnel Display", system-ui;
+  font-weight: var(--font-medium);
   font-size: calc(0.6 * var(--m));
   border-radius: 8px;
   padding: 0.75rem 1.5rem;
@@ -69,36 +150,12 @@ button {
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  background: linear-gradient(var(--background-color), var(--background-color)), 
-              linear-gradient(var(--background-color) 50%, rgba(18, 18, 19, 0.6) 80%, rgba(18, 18, 19, 0)),  
-              linear-gradient(90deg, var(--orange), var(--yellow), var(--green), var(--blue), var(--purple), var(--pink), var(--red));
-  background-origin: border-box;
-  background-clip: padding-box, border-box, border-box;
-  background-size: 200%;
-  animation: animate 2s infinite linear;
+  background: var(--card-background);
   transition: transform 0.2s;
-}
-
-button::before {
-  content: '';
-  background: linear-gradient(90deg, var(--orange), var(--yellow), var(--green), var(--blue), var(--purple), var(--pink), var(--red));
-  height: 30%;
-  width: 60%;
-  position: absolute;
-  bottom: -20%;
-  z-index: -5;
-  background-size: 200%;
-  animation: animate 2s infinite linear;
-  filter: blur(calc(0.8 * var(--m)));
 }
 
 button:hover {
   transform: translateY(-2px);
-}
-
-button:hover, 
-button:hover::before {
-  animation: animate 0.5s infinite linear;
 }
 
 button:disabled {
@@ -107,7 +164,9 @@ button:disabled {
   transform: none;
 }
 
-input {
+input, textarea, select {
+  font-family: "Funnel Display", system-ui;
+  font-weight: var(--font-regular);
   font-size: 1rem;
   padding: 0.75rem 1rem;
   border: 1px solid var(--secondary-color);
@@ -205,4 +264,13 @@ input:focus {
   z-index: 5;  /* Increased to be above blur layer */
   min-height: 100vh;
   width: 100%;
+}
+
+/* Remove Cairo Play specific classes */
+.cairo-play-text,
+.cairo-play-normal,
+.cairo-play-medium,
+.cairo-play-bold,
+.cairo-play-italic {
+  display: none;
 }

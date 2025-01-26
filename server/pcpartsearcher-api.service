@@ -6,6 +6,7 @@ After=network.target
 User=root
 WorkingDirectory=/var/www/pcpartsearcher-api
 Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+Environment="PYTHONPATH=/var/www/pcpartsearcher-api"
 ExecStart=/usr/local/bin/uvicorn app.main:app --host 0.0.0.0 --port 3500
 Restart=always
 

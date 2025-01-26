@@ -91,7 +91,7 @@ deploy-frontend:
   only:
     - main
 
-# Backend deployment with package installation
+# Backend deployment with correct file structure
 deploy-backend:
   stage: deploy
   image: alpine:latest
@@ -100,13 +100,17 @@ deploy-backend:
   script:
     - apk add --no-cache openssh-client sshpass
     - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "mkdir -p $API_DEPLOY_DIR"
-    - sshpass -p "$SSH_PASSWORD" scp -r -o StrictHostKeyChecking=no server/* scrapers setup.py root@$SERVER_IP:$API_DEPLOY_DIR
+    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "rm -rf $API_DEPLOY_DIR/*"  # Clean old files
+    - sshpass -p "$SSH_PASSWORD" scp -r -o StrictHostKeyChecking=no server/* root@$SERVER_IP:$API_DEPLOY_DIR/
+    - sshpass -p "$SSH_PASSWORD" scp -r -o StrictHostKeyChecking=no scrapers root@$SERVER_IP:$API_DEPLOY_DIR/
+    - sshpass -p "$SSH_PASSWORD" scp -r -o StrictHostKeyChecking=no setup.py root@$SERVER_IP:$API_DEPLOY_DIR/
     - sshpass -p "$SSH_PASSWORD" scp -r -o StrictHostKeyChecking=no server/pcpartsearcher-api.service root@$SERVER_IP:/etc/systemd/system/
+    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "cd $API_DEPLOY_DIR && ls -la"  # Debug directory contents
     - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "command -v python3 >/dev/null 2>&1 || yum install -y python3"
     - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "command -v pip3 >/dev/null 2>&1 || python3 -m ensurepip"
     - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "yum install -y gcc python3-devel"
     - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "cd $API_DEPLOY_DIR && pip3 install -r requirements.txt"
-    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "cd $API_DEPLOY_DIR && pip3 install -e ."
+    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "cd $API_DEPLOY_DIR && PYTHONPATH=$API_DEPLOY_DIR pip3 install -e ."
     - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "firewall-cmd --permanent --add-port=3500/tcp || true"
     - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "firewall-cmd --reload || true"
     - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "systemctl daemon-reload"

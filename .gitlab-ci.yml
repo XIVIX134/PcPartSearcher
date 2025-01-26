@@ -14,9 +14,7 @@ frontend-test:
   stage: test
   image: node:18-alpine
   cache:
-    key:
-      files:
-        - client/package-lock.json
+    key: client-cache
     paths:
       - client/node_modules
   script:
@@ -29,9 +27,7 @@ frontend-build:
   stage: build
   image: node:18-alpine
   cache:
-    key:
-      files:
-        - client/package-lock.json
+    key: client-cache
     paths:
       - client/node_modules
   script:
@@ -47,9 +43,7 @@ backend-test:
   stage: test
   image: python:3.12-slim
   cache:
-    key:
-      files:
-        - server/requirements.txt
+    key: server-cache
     paths:
       - .pip-cache/
   variables:
@@ -62,6 +56,12 @@ backend-test:
 backend-build:
   stage: build
   image: python:3.12-slim
+  cache:
+    key: server-cache
+    paths:
+      - .pip-cache/
+  variables:
+    PIP_CACHE_DIR: .pip-cache/
   script:
     - cd server
     - pip install -r requirements.txt

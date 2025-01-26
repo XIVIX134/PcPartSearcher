@@ -69,7 +69,7 @@ backend-build:
     paths:
       - server/
 
-# Deployment jobs
+# Frontend deployment with firewall configuration
 deploy-frontend:
   stage: deploy
   image: alpine:latest
@@ -79,13 +79,19 @@ deploy-frontend:
     - apk add --no-cache openssh-client sshpass
     - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "mkdir -p $DEPLOY_DIR"
     - sshpass -p "$SSH_PASSWORD" scp -r -o StrictHostKeyChecking=no client/dist/* root@$SERVER_IP:$DEPLOY_DIR
+    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "mkdir -p /etc/nginx/conf.d"
     - sshpass -p "$SSH_PASSWORD" scp -r -o StrictHostKeyChecking=no server/pcpartsearcher.conf root@$SERVER_IP:/etc/nginx/conf.d/
     - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "command -v nginx >/dev/null 2>&1 || yum install -y nginx"
+    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "firewall-cmd --permanent --add-port=6565/tcp || true"
+    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "firewall-cmd --reload || true"
+    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "setenforce 0 || true"  # Temporarily disable SELinux
     - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "systemctl restart nginx"
-    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "curl -f http://localhost || exit 1"
+    - sleep 5
+    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "curl -f http://localhost:6565 || exit 1"  # Updated port
   only:
     - main
 
+# Backend deployment with firewall configuration
 deploy-backend:
   stage: deploy
   image: alpine:latest
@@ -100,9 +106,14 @@ deploy-backend:
     - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "command -v pip3 >/dev/null 2>&1 || python3 -m ensurepip"
     - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "yum install -y gcc python3-devel"
     - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "cd $API_DEPLOY_DIR && pip3 install -r requirements.txt"
+    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "firewall-cmd --permanent --add-port=3500/tcp || true"
+    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "firewall-cmd --reload || true"
     - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "systemctl daemon-reload"
     - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "systemctl enable pcpartsearcher-api"
+    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "setenforce 0 || true"  # Temporarily disable SELinux
     - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "systemctl restart pcpartsearcher-api"
+    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "systemctl status pcpartsearcher-api || true"  # Debug output
+    - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "journalctl -u pcpartsearcher-api -n 50 || true"  # More debug output
     - sleep 5
     - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "curl -f http://localhost:3500/health || exit 1"
   only:

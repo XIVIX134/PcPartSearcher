@@ -1,0 +1,13 @@
+[Unit]
+Description=PcPartSearcher API Service
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/var/www/pcpartsearcher-api
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+ExecStart=/usr/local/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

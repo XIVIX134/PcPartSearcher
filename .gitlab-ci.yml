@@ -79,6 +79,7 @@ deploy-frontend:
     - apk add --no-cache openssh-client sshpass
     - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "mkdir -p $DEPLOY_DIR"
     - sshpass -p "$SSH_PASSWORD" scp -r -o StrictHostKeyChecking=no client/dist/* root@$SERVER_IP:$DEPLOY_DIR
+    - sshpass -p "$SSH_PASSWORD" scp -r -o StrictHostKeyChecking=no server/pcpartsearcher.conf root@$SERVER_IP:/etc/nginx/conf.d/
     - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "command -v nginx >/dev/null 2>&1 || yum install -y nginx"
     - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "systemctl restart nginx"
     - sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no root@$SERVER_IP "curl -f http://localhost || exit 1"

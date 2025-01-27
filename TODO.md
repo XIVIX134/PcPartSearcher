@@ -1,18 +1,18 @@
 # Todo:
 ## Frontend
   - Asser:
+    - [X] Add Accounts Frontend
+    - [X] Add Advanced Search
+    - [X] Add Searching Indicator
+    - [X] Add wishlists to the frontend
     - [ ] Add Categories
     - [ ] Add keywords
     - [ ] Add NavBar
-    - [X] Add Advanced Search
-    - [ ] Add Searching Indicator
     - [ ] Fix Bugs
     - [ ] Add Docker
-    - [ ] Add Accounts Frontend
     - [ ] Fix Mobile Layout
     - [ ] Improve Mobile performance
     - [ ] Add PcPartPicker to the frontend
-    - [ ] Add wishlists to the frontend
 # Backend
   - Loay:
     - [ ] Fix elfrncia spyders

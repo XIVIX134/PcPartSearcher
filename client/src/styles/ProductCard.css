@@ -2,8 +2,8 @@
   background: rgba(255, 255, 255, 0.03);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
@@ -18,11 +18,19 @@
   height: 100%; /* Make card fill container */
 }
 
+.product-card a {
+  text-decoration: none;
+  color: var(--text-color);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .product-card:hover {
   transform: translateY(-5px);
   background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(24px) saturate(200%);
   -webkit-backdrop-filter: blur(24px) saturate(200%);
+  backdrop-filter: blur(24px) saturate(200%);
   border-color: rgba(255, 255, 255, 0.2);
   box-shadow: 0 8px 12px -1px rgba(0, 0, 0, 0.2);
 }
@@ -64,8 +72,8 @@
   flex-direction: column;
   gap: 0.5rem;
   flex: 1;
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   z-index: 1;
   height: 180px; /* Fixed height for info section */
   justify-content: space-between; /* Distribute content evenly */
@@ -303,6 +311,7 @@
     max-width: none;
     width: 100%;
     height: auto;
+    min-height: 0;
   }
 
   .results-list .product-card,
@@ -384,4 +393,43 @@
     flex-wrap: wrap;
     gap: 0.5rem;
   }
+}
+
+.wishlist-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  z-index: 10;
+}
+
+.wishlist-button svg {
+  width: 20px;
+  height: 20px;
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.wishlist-button:hover {
+  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.wishlist-button.active {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.wishlist-button.active svg {
+  color: #ef4444;
 }

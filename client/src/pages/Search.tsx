@@ -4,17 +4,8 @@ import { searchProducts } from '../services/api';
 import { ProductCard } from '../components/ProductCard';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { SourceFilters } from '../components/SourceFilters';
-import type { Product, SourceType, StockFilter as StockFilterType } from '../types';
-interface SearchResponse {
-  olx: Product[];
-  badr: Product[];
-  sigma: Product[];
-  amazon: Product[];
-  alfrensia: Product[];
-  totalPages: number;
-  itemsPerPage: number;
-  status: string;
-}
+import { Toast } from '../components/Toast';
+import type { Product, SourceType, StockFilter as StockFilterType, SearchResponse } from '../types';
 import '../styles/Search.css';
 import { FiltersBar } from '../components/FiltersBar';
 import { AdvancedSearchModal } from '../components/AdvancedSearchModal';
@@ -41,6 +32,7 @@ export const SearchPage: React.FC = () => {
   const [isFiltersVisible, setIsFiltersVisible] = useState(false);
   const [gridSize, setGridSize] = useState(4);
   const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   // Keep track of which sources have been searched
   const [searchedSources, setSearchedSources] = useState<Record<SourceType, boolean>>({
@@ -262,19 +254,60 @@ export const SearchPage: React.FC = () => {
 
   // Load preferences from cookies on mount
   useEffect(() => {
-    const savedPreferences = getCookie('searchPreferences');
-    if (savedPreferences) {
-      if (savedPreferences.sourceFilters) {
-        setSourceFilters(savedPreferences.sourceFilters);
+    const loadPreferences = () => {
+      const savedPreferences = getCookie('userPreferences');
+      if (savedPreferences) {
+        if (savedPreferences.defaultView) {
+          setView(savedPreferences.defaultView);
+        }
+        if (savedPreferences.defaultSources) {
+          setSourceFilters(prev => Object.fromEntries(
+            Object.keys(prev).map(source => [
+              source,
+              savedPreferences.defaultSources.includes(source)
+            ])
+          ) as SourceFilters);
+        }
       }
-    }
-  }, []);
+    };
+    loadPreferences();
+  }, []);  // Empty dependency array since we use functional updates
+
+  // Listen for storage changes
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'userPreferences') {
+        const newPreferences = JSON.parse(e.newValue || '{}');
+        if (newPreferences.defaultView) {
+          setView(newPreferences.defaultView);
+        }
+        if (newPreferences.defaultSources) {
+          setSourceFilters(prev => Object.fromEntries(
+            Object.keys(prev).map(source => [
+              source,
+              newPreferences.defaultSources.includes(source)
+            ])
+          ) as SourceFilters);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []); // Empty dependency array since we use functional updates
+
+  const handleWishlistToggle = (product: Product) => {
+    const isCurrentlyInWishlist = false; // This will be replaced when we have backend
+    setToast({
+      message: `${product.Title} ${isCurrentlyInWishlist ? 'removed from' : 'added to'} wishlist`,
+      type: 'success'
+    });
+  };
 
   return (
     <div className="search-page">
       <div className={`search-container ${hasResults ? 'has-results' : ''}`}>
         <h1 className="title-glow">PC Part Searcher</h1>
-        
         <form onSubmit={handleSubmit} className="search-form">
           <div className={`input-container ${hasResults ? 'expanded' : ''}`}>
             <input
@@ -341,7 +374,6 @@ export const SearchPage: React.FC = () => {
           <div className={`results-container visible`}>
             <div className="results-header">
               <div className="header-left">
-                <h2>Found {processedProducts.length} items</h2>
                 <button 
                   className="filters-toggle"
                   onClick={() => setIsFiltersVisible(!isFiltersVisible)}
@@ -370,7 +402,10 @@ export const SearchPage: React.FC = () => {
                   {paginatedProducts.map((product: Product) => (
                     <ProductCard 
                       key={product.uid} 
-                      product={product} 
+                      product={product}
+                      showWishlistButton={true}
+                      isInWishlist={false} // This will be updated when we have backend
+                      onWishlistToggle={handleWishlistToggle}
                     />
                   ))}
                 </div>
@@ -413,6 +448,13 @@ export const SearchPage: React.FC = () => {
         lastSearchTerm={lastSearchTerm}
         searchedSources={searchedSources}
       />
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 };

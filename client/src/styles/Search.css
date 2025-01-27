@@ -108,7 +108,8 @@
   align-items: center;
   z-index: 1;
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: transform 0.2s ease;
+  color: var(--text-color);
 }
 
 .search-button::before,
@@ -122,8 +123,21 @@
   bottom: -20%;
   z-index: -5;
   background-size: 200%;
-  animation: animate 2s infinite linear;
+  opacity: 0;
   filter: blur(calc(0.8 * var(--m)));
+  transition: opacity 0.3s ease;
+}
+
+.search-button:hover::before,
+.filters-toggle:hover::before,
+.pagination button:hover::before {
+  opacity: 0.5;
+}
+
+.search-button:hover,
+.filters-toggle:hover,
+.pagination button:hover {
+  transform: translateY(-2px);
 }
 
 .search-button {
@@ -149,11 +163,6 @@
 
 .input-container.expanded .search-button {
   flex-shrink: 0;
-}
-
-.search-button:hover {
-  transform: none;
-  box-shadow: none;
 }
 
 .loader-container {

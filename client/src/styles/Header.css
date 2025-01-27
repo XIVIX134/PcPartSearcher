@@ -1,0 +1,35 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem 2rem;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title-link {
+  text-decoration: none;
+}
+
+.title-link h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  transition: transform 0.2s ease;
+}
+
+.title-link:hover h1 {
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 1rem;
+  }
+  
+  .title-link h1 {
+    font-size: 1.2rem;
+  }
+}
